@@ -1,6 +1,6 @@
 <?php 
-
 require_once "autoload.php"; 
+
 use App\Core\Router; 
 use App\Controllers\ProductController; 
 
