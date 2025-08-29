@@ -2,7 +2,7 @@
 require_once "autoload.php"; 
 
 use App\Core\Router; 
-use App\Controllers\ProductController; 
+use App\Controllers\ProductController;  
 
 $router = new Router; 
 
@@ -22,7 +22,7 @@ $router->get('/user/{userId:[1-9]+}/product/{product}', function(string $userId,
     echo <<<HTML
     User ID : $userId <br> Product Slug : $product
     HTML;
-});
+}); 
 
 $router->run(); 
 
