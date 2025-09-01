@@ -18,7 +18,10 @@ class Migrations
     {    
         $sql = "CREATE TABLE IF NOT EXISTS ".$table." (
         id int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-        name varchar(255)
+        name varchar(255), 
+        surname varchar(255), 
+        age varchar(255), 
+        city varchar(255)
         );"; 
         $data = $this->pdo->prepare($sql); 
         $data->execute();

@@ -1,0 +1,41 @@
+<?php 
+declare(strict_types=1); 
+
+namespace App\Models;  
+use App\Core\Connections\Connection; 
+use App\Core\Connections\MySQL;
+
+abstract class Model 
+{      
+    protected static \PDO $pdo; 
+
+    public static function pdo() : \PDO
+    {        
+        if (!isset(self::$pdo)) {
+            return self::$pdo = Connection::connect(new Mysql); 
+        }
+    } 
+
+    public static function fetchAllData(string $table) : array
+    {
+        $stmt = self::pdo()->prepare("SELECT * FROM ".$table);
+        $stmt->execute(); 
+        return $stmt->fetchAll(); 
+    }
+
+    public function storeData(object $data, string $table) : bool
+    {
+       $data = (array)$data; 
+
+       $fields = implode(',', array_keys($data));    
+       $values = implode(',', array_values(array_map(function($n){ return "'" . $n . "'"; }, $data)));
+     
+       $stmt = self::pdo()->prepare("INSERT INTO ".$table." (".$fields.") VALUES (".$values.")")->execute();
+       return true; 
+    }    
+
+}
+
+
+
+?>

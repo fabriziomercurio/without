@@ -3,15 +3,27 @@ declare(strict_types=1);
 
 namespace App\Core; 
 use App\Controllers\ProductController; 
+use App\Core\Request; 
 
 class Router 
 {   
-    private array $routes = []; 
+    private array $routes = [];
+    private Request $request; 
+
+    public function __construct() 
+    {
+        $this->request = new Request; 
+    }
 
     public function get(string $uri, callable|array $callback)  
     {
         $this->routes['GET'][$uri] = $callback; 
     } 
+
+    public function post(string $uri, callable|array $callback)  
+    {
+        $this->routes['POST'][$uri] = $callback; 
+    }
     
     /**
      * @param array $routes 
@@ -78,12 +90,17 @@ class Router
             return call_user_func_array($callback,$routeParams); 
         }
 
-        if (is_array($callback)) { 
-                 
+        if (is_array($callback) && $_SERVER['REQUEST_METHOD'] === 'GET') { 
+           
             $callback[0] = new $callback[0];            
             return call_user_func_array($callback,$routeParams); 
+        } 
 
+        if (is_array($callback) && $_SERVER['REQUEST_METHOD'] === 'POST') { 
+            $callback[0] = new $callback[0]; 
+            return call_user_func($callback,$this->request); 
         }
+
     }
 
 } //end class 
