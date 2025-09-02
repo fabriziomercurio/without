@@ -10,7 +10,7 @@ class Request
         return $_SERVER['REQUEST_METHOD']; 
     } 
 
-    public function getBody()
+    public function getBody() : array
     {       
         if ($this->getMethod() === 'POST') {
             return $_POST; 

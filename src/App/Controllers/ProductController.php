@@ -6,13 +6,19 @@ use App\Core\Connections\Connection;
 use App\Core\Connections\MySQL;
 use App\Models\Product; 
 use App\Core\Request; 
+use App\Services\ProductService; 
 
 class ProductController extends Controller 
 {   
+    public function __construct(private ProductService $productService = new ProductService) 
+    {  
+       parent::__construct(); 
+    } 
+
     public function show() 
     {   
-        $row = Product::fetchAll();  
-        $this->render->renderView('product',['name' => 'List of Products', 'rows' => $row]);  
+        $row = $this->productService->fetchAll(); 
+        $this->render->renderView('product',['name' => 'List of Products', 'rows' => $row]);     
     }
 
     public function edit(string $productId) 
@@ -22,12 +28,7 @@ class ProductController extends Controller
 
     public function store(Request $request) 
     {
-        $product = new Product;         
-        $product->name = $request->getBody()['name']; 
-        $product->surname = $request->getBody()['surname']; 
-        $product->age = $request->getBody()['age']; 
-        $product->city = $request->getBody()['city'];
-        $data = $product->store($product); 
+        $data = $this->productService->store($request); 
 
         if ($data === true) {
             return ['message' => 'record inserito correttamente', 'code' => 200];

@@ -1,0 +1,23 @@
+<?php 
+
+namespace App\Repositories; 
+use App\Models\Product; 
+use App\Core\Request; 
+
+class ProductRepository 
+{
+    public function fetchAll() : array
+    {
+        return Product::fetchAll(); 
+    } 
+
+    public function store(Request $request) : bool 
+    {
+        $data = new Product; 
+        $data->name = $request->getBody()['name']; 
+        $data->surname = $request->getBody()['surname'];
+        $data->age = $request->getBody()['age'];
+        $data->city = $request->getBody()['city'];
+        return $data->store($data); 
+    }
+}

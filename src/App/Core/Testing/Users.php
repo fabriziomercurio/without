@@ -1,22 +1,16 @@
 <?php
 declare(strict_types=1); 
 
-namespace App\Core; 
+namespace App\Core\Testing; 
+use App\Core\Migrations; 
 use App\Core\Connections\Connection; 
 use App\Core\Connections\MySQL;
 
-abstract class Migrations 
-{   
-    protected \PDO $pdo; 
-
-    public function __construct() 
-    {
-        $this->pdo = Connection::connect(new Mysql); 
-    }
-
-    public function up(string $table) 
-    {    
-        $sql = "CREATE TABLE IF NOT EXISTS ".$table." (
+class Users extends Migrations
+{         
+    function up(string $table) 
+    {   
+        $sql = "CREATE TABLE IF NOT EXISTS ".strtolower($table)." (
         id int AUTO_INCREMENT PRIMARY KEY NOT NULL,
         name varchar(255), 
         surname varchar(255), 
@@ -30,9 +24,9 @@ abstract class Migrations
 
     public function down(string $table) 
     {    
-        $sql = "DROP TABLE IF EXISTS ".$table; 
+        $pdo = Connection::connect(new Mysql);
+        $sql = "DROP TABLE IF EXISTS ".strtolower($table); 
         $data = $this->pdo->prepare($sql); 
         $data->execute();
     }
-
-} 
+}

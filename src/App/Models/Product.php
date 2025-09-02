@@ -6,7 +6,7 @@ use App\Models\Model;
 
 class Product extends Model
 {   
-    public static function fetchAll() 
+    public static function fetchAll() : array
     {   
         return self::fetchAllData('products'); 
       
@@ -16,9 +16,7 @@ class Product extends Model
     {   
         return $this->storeData($data,'products'); 
     }
-
 }
-
 
 
 ?>

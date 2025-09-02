@@ -3,6 +3,7 @@ require_once "autoload.php";
 
 use App\Core\Router; 
 use App\Controllers\ProductController;  
+use App\Controllers\RegisterController; 
 
 $router = new Router; 
 
@@ -13,6 +14,9 @@ $router->get('about', function(){
 $router->get('login', function(){
     echo 'login run ... '; 
 }); 
+
+$router->get('register-form',[RegisterController::class,'show']);
+$router->post('register',[RegisterController::class,'store']);
 
 $router->get('product',[ProductController::class, 'show']);
 $router->post('product',[ProductController::class, 'store']); 

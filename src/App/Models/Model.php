@@ -21,15 +21,14 @@ abstract class Model
         $stmt = self::pdo()->prepare("SELECT * FROM ".$table);
         $stmt->execute(); 
         return $stmt->fetchAll(); 
-    }
-   
+    }   
 
     public function storeData(object $data, string $table) : bool
-    { 
-        $data = (array)$data; 
-         
+    {   
+        $data = (array)$data;          
         $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
-        $sql = "INSERT INTO products (name,surname,age,city) VALUES (".$parameters.");";  
+        $values = implode(",",array_keys($data)); 
+        $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";  
         self::pdo()->prepare($sql)->execute($data);               
         return true;        
     }    
