@@ -22,20 +22,19 @@ abstract class Model
         $stmt->execute(); 
         return $stmt->fetchAll(); 
     }
+   
 
     public function storeData(object $data, string $table) : bool
-    {
-       $data = (array)$data; 
-
-       $fields = implode(',', array_keys($data));    
-       $values = implode(',', array_values(array_map(function($n){ return "'" . $n . "'"; }, $data)));
-     
-       $stmt = self::pdo()->prepare("INSERT INTO ".$table." (".$fields.") VALUES (".$values.")")->execute();
-       return true; 
+    { 
+        $data = (array)$data; 
+         
+        $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
+        $sql = "INSERT INTO products (name,surname,age,city) VALUES (".$parameters.");";  
+        self::pdo()->prepare($sql)->execute($data);               
+        return true;        
     }    
 
 }
-
 
 
 ?>

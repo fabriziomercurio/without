@@ -21,7 +21,8 @@ class Migrations
         name varchar(255), 
         surname varchar(255), 
         age varchar(255), 
-        city varchar(255)
+        city varchar(255), 
+        created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );"; 
         $data = $this->pdo->prepare($sql); 
         $data->execute();
