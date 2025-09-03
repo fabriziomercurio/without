@@ -15,7 +15,7 @@ $router->get('login', function(){
     echo 'login run ... '; 
 }); 
 
-$router->get('register-form',[RegisterController::class,'show']);
+$router->get('register',[RegisterController::class,'show']);
 $router->post('register',[RegisterController::class,'store']);
 
 $router->get('product',[ProductController::class, 'show']);
