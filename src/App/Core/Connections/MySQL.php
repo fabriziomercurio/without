@@ -7,7 +7,7 @@ use App\Core\Env;
 
 class MySQL implements Database
 {   
-    public static function connect() 
+    public static function connect() : \PDO
     {   
         ENV::getContent();
 

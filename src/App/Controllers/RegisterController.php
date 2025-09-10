@@ -24,7 +24,7 @@ class RegisterController extends Controller
         $user = new User; 
         $user->loadData($request->getBody()); 
         $validate = $user->validate(); 
-        var_dump($validate); 
+        
         $this->render->renderView('register-form', $validate); 
         if (empty($validate)) {
              $this->registerService->store($request);

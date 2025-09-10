@@ -1,8 +1,8 @@
 <?php
 declare(strict_types=1); 
 
-namespace App\Core\Testing; 
-use App\Core\Migrations; 
+namespace App\Core\Migration\Schema; 
+use App\Core\Migration\Migrations; 
 use App\Core\Connections\Connection; 
 use App\Core\Connections\MySQL;
 
@@ -12,8 +12,10 @@ class Users extends Migrations
     {   
         $sql = "CREATE TABLE IF NOT EXISTS ".strtolower($table)." (
         id int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-        name varchar(255), 
-        surname varchar(255), 
+        firstname varchar(255), 
+        lastname varchar(255), 
+        email varchar(255), 
+        password varchar(255), 
         age varchar(255), 
         city varchar(255), 
         created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP

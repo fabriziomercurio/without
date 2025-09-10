@@ -8,6 +8,8 @@ class User extends Model
 {
     public string $firstname; 
     public string $lastname;    
+    public string $email; 
+    public string $password;
 
     protected function rules() 
     {
