@@ -18,7 +18,8 @@ class ProductController extends Controller
     public function show() 
     {   
         $row = $this->productService->fetchAll(); 
-        $this->render->renderView('product',['name' => 'List of Products', 'rows' => $row]);     
+        echo json_encode($row);  // for react front-end 
+        //$this->render->renderView('product',['name' => 'List of Products', 'rows' => $row]);  // for php front-end
     }
 
     public function edit(string $productId) 

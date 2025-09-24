@@ -10,6 +10,8 @@ class User extends Model
     public string $lastname;    
     public string $email; 
     public string $password;
+    public string $age; 
+    public string $city; 
 
     protected function rules() 
     {

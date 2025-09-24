@@ -6,6 +6,7 @@ use App\Controllers\Controller;
 use App\Services\RegisterService; 
 use App\Core\Request; 
 use App\Models\User; 
+use App\Core\Response;
 
 class RegisterController extends Controller 
 {   
@@ -22,30 +23,10 @@ class RegisterController extends Controller
     public function store(Request $request) 
     {   
         $user = new User; 
-        $user->loadData($request->getBody()); 
-        $validate = $user->validate(); 
-        
-        $this->render->renderView('register-form', $validate); 
-        if (empty($validate)) {
-             $this->registerService->store($request);
-        }
-        // if (!empty($validate)) {
-        //     foreach ($validate as $key => $value) {
-        //         echo $key . ' ' . $value . '</br>'; 
-        //     }
-        // }
-
-        
- 
-        // $data = $this->registerService->store($request);
-        
-        // if ($data === true) { 
-               
-        //     return ['message' => 'record inserito correttamente', 'code' => 200];
-        // }else {
-        //     return ['message' => 'inserimento record non riuscito', 'code' => 500];
-        // }
+        $user->loadData($request->getBody());       
+        $user = $this->registerService->store($request);
+        Response::success('Utente registrato con successo',$user);
+        //$validate = $user->validate();  
     }
 }
-
 ?>

@@ -20,10 +20,12 @@ class LoginController
         $stmt->execute(['email' => $request->getBody()["email"], 'password' => $request->getBody()["password"]]); 
         $user = $stmt->fetch();
         if(is_array($user) && $user !== false) 
-        {
-            echo "ti sei loggato correttamente"; 
-        }else {
-            echo "credenziali non valide"; 
+        {   
+            header('Content-Type: application/json');
+            echo json_encode(['message' => "ti sei loggato correttamente"]); 
+        }else { 
+            header('Content-Type: application/json');
+            echo json_encode(['error' => "credenziali non valide"]); 
         }
     }
 } 

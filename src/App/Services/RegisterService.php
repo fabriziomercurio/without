@@ -10,7 +10,7 @@ class RegisterService
     public function __construct(private RegisterRepository $registerRepository = new RegisterRepository) 
     {} 
 
-    public function store(Request $request) : bool 
+    public function store(Request $request) 
     {
        return $this->registerRepository->store($request); 
     }
