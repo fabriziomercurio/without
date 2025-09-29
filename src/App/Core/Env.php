@@ -36,6 +36,8 @@ class Env
         self::$config['USER'] = getenv('USER');
         self::$config['DATABASE'] = getenv('DATABASE');
         self::$config['PASSWORD'] = getenv('PASSWORD');
+        self::$config['PUBLIC_KEY'] = getenv('PUBLIC_KEY');
+        self::$config['PRIVATE_KEY'] = getenv('PRIVATE_KEY');
     } 
 
 } 
