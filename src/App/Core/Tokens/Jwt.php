@@ -7,11 +7,9 @@ use App\Interfaces\Token;
 
 class Jwt implements Token
 {
-    private string $secretKey;
-
-    public function __construct(string $key)
+    public function __construct(private string $secretKey)
     {
-        $this->secretKey = $key;
+        $this->secretKey = $secretKey;
     }
 
     public function create(array $payload): string
@@ -34,8 +32,7 @@ class Jwt implements Token
             throw new \Exception("Chiave privata non valida: " . openssl_error_string());
         }
 
-        $success = openssl_sign($dataToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);
-       
+        $success = openssl_sign($dataToSign, $signature, $privateKey, OPENSSL_ALGO_SHA256);       
 
         if (!$success) {
             throw new \Exception("Errore nella firma");
@@ -54,9 +51,6 @@ class Jwt implements Token
         }
 
         [$header, $payload, $signature] = $parts; 
-
-       
-
 
         $dataToVerify = $header . '.' . $payload;
         $signatureDecode = base64_decode(strtr($signature, '-_', '+/'));

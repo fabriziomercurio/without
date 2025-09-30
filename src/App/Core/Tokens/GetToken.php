@@ -5,12 +5,10 @@ namespace App\Core\Tokens;
 use App\Interfaces\Token; 
 
 class GetToken 
-{
-   private Token $token; 
-
-   public function __construct(Token $t) 
+{  
+   public function __construct(private Token $token) 
    {
-      $this->token = $t;
+      $this->token = $token;
    } 
 
    public function create(array $payload) 
