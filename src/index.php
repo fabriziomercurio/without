@@ -1,11 +1,10 @@
 <?php
-ob_start(); 
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
 require_once "autoload.php"; 
 
 use App\Core\Router; 
+use App\Middlewares\Cors;
+
+Cors::handle();
 
 $router = new Router;  
 

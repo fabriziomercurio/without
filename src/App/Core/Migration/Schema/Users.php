@@ -26,9 +26,6 @@ class Users extends Migrations
 
     public function down(string $table) 
     {    
-        $pdo = Connection::connect(new Mysql);
-        $sql = "DROP TABLE IF EXISTS ".strtolower($table); 
-        $data = $this->pdo->prepare($sql); 
-        $data->execute();
+        $this->downTable($table);
     }
 }

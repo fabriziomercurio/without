@@ -28,11 +28,17 @@ abstract class Migrations
         $data->execute();
     } 
 
-    public function down(string $table) 
+    public function downTable(string $table) : bool
     {    
-        $sql = "DROP TABLE IF EXISTS ".$table; 
+        $sql = $this->dropTableSql($table); 
         $data = $this->pdo->prepare($sql); 
-        $data->execute();
+        return $data->execute();
+    }
+
+    protected function dropTableSql(string $table) : string 
+    {
+        $sql = "DROP TABLE IF EXISTS " . strtolower($table); 
+        return $sql; 
     }
 
 } 
