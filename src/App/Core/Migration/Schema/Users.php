@@ -5,23 +5,24 @@ namespace App\Core\Migration\Schema;
 use App\Core\Migration\Migrations; 
 use App\Core\Connections\Connection; 
 use App\Core\Connections\MySQL;
+use App\Core\Builders\TableBuilder; 
 
 class Users extends Migrations
 {         
-    function up(string $table) 
+    public function up(string $table) 
     {   
-        $sql = "CREATE TABLE IF NOT EXISTS ".strtolower($table)." (
-        id int AUTO_INCREMENT PRIMARY KEY NOT NULL,
-        firstname varchar(255), 
-        lastname varchar(255), 
-        email varchar(255), 
-        password varchar(255), 
-        age varchar(255), 
-        city varchar(255), 
-        created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        );"; 
-        $data = $this->pdo->prepare($sql); 
-        $data->execute();
+        $obj = new TableBuilder; 
+        $obj->table($table)
+        ->addColumn('id', 'int AUTO_INCREMENT PRIMARY KEY', false)
+        ->addColumn('firstname', 'varchar(255)')
+        ->addColumn('lastname', 'varchar(255)')
+        ->addColumn('email', 'varchar(255)')
+        ->addColumn('password', 'varchar(255)')
+        ->addColumn('age', 'varchar(255)')
+        ->addColumn('city', 'varchar(255)')
+        ->timestamps();
+        $query = $obj->builder();
+        $this->pdo->prepare($query)->execute();  
     } 
 
     public function down(string $table) 

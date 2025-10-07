@@ -7,10 +7,10 @@ use App\Core\Builders\TableBuilder;
 
 class Products extends Migrations
 {
-    function up(string $products) 
+    function up(string $table) 
     {   
-        $query = new TableBuilder; 
-        $query->table($products) 
+        $obj = new TableBuilder; 
+        $obj->table($table) 
         ->addColumn('id','int AUTO_INCREMENT PRIMARY KEY',false)
         ->addColumn('firstname','varchar(255)')
         ->addColumn('lastname','varchar(255)')
@@ -19,8 +19,8 @@ class Products extends Migrations
         ->addColumn('age','varchar(255)')
         ->addColumn('city','varchar(255)')
         ->timestamps(); 
-        $sql = $query->builder();
-        $this->pdo->prepare($sql)->execute(); 
+        $query = $obj->builder();
+        $this->pdo->prepare($query)->execute(); 
     }
 
     public function down(string $table) 
