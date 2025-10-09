@@ -36,22 +36,58 @@ abstract class Migrations implements Migration
         $sql = "DROP TABLE IF EXISTS " . strtolower($table);
         $data = $this->pdo->prepare($sql); 
         return $data->execute();
+    } 
+
+    public static function downAllTables() 
+    {
+        $pdo = Connection::connect(new MySQL); 
+        $env = ENV::getContent(); 
+
+        $sql = "SELECT table_name FROM information_schema.tables
+        WHERE table_schema = ?"; 
+        $data = $pdo->prepare($sql); 
+        $res = $data->execute([ENV::$config['DATABASE']]); 
+        if ($res) {
+            foreach($data->fetchAll(\PDO::FETCH_COLUMN) as $table) 
+            {   
+                $pdo->exec('DROP TABLE IF EXISTS ' . $table);                         
+            } 
+            exit('delete all migrations'); 
+        } 
+        exit('db not found');         
     }
 
     public static function checkIfTableExists() : array|false
     {
-        $migrations = []; 
-
         $pdo = Connection::connect(new MySQL); 
         $env = ENV::getContent();      
 
+        $migrations = self::scandirCustom([]); 
+
+        $migrations[] = 'migrations';
+
+        $placeHolders = implode(",",array_fill(0, count($migrations), '?'));
+
+        $sql = self::queryTable(ENV::$config["DATABASE"],$placeHolders, true);
+
+        $data = $pdo->prepare($sql); 
+        $params = array_merge([ENV::$config["DATABASE"]], $migrations);
+        $data->execute($params); 
+
+        $countTables = $data->fetchAll(\PDO::FETCH_COLUMN); 
+
+        if (count($countTables) !== count($migrations)) return false;     
+
+        return $countTables; 
+    } 
+
+    private static function scandirCustom(array $migrations) 
+    {
         $migrationFiles = scandir(__DIR__ . '/Schema/'); 
 
         foreach ($migrationFiles as $migrate) { 
 
-            if ($migrate === '.' || $migrate === '..') {
-                continue; 
-            }
+            if ($migrate === '.' || $migrate === '..') continue;         
             
             if (pathinfo($migrate, PATHINFO_EXTENSION) === 'php') {
               $pos = strpos($migrate, '.php');
@@ -69,64 +105,36 @@ abstract class Migrations implements Migration
             }    
         }
 
-        $migrations[] = 'migrations';
+        return $migrations;
+    }
 
-        $placeHolders = implode(",",array_fill(0, count($migrations), '?'));
+    private static function queryTable(string $db, string $placeHolders, bool $condition = false) : string
+    {
+        $addToQuery = ''; 
 
-        $sql = "SELECT table_name FROM information_schema.tables
-        WHERE table_schema = '".ENV::$config["DATABASE"]."'
-            AND table_name IN ($placeHolders);"; 
-
-        $data = $pdo->prepare($sql); 
-        $data->execute($migrations); 
-        $countTables = $data->fetchAll(\PDO::FETCH_COLUMN); 
-
-        if (count($countTables) !== count($migrations)) {
-            echo 'entro'; 
-            return false; 
+        if ($condition === true) {
+            $addToQuery = "AND table_name IN ($placeHolders);";
         } 
 
-        return $countTables; 
-    } 
+        $sql = "SELECT table_name FROM information_schema.tables
+        WHERE table_schema = ?".$addToQuery;
+        return $sql; 
+    }
 
-    public static function cleanMigrationsIfFilesNotExists() 
+    public static function removeOrphanTables() 
     {
-        $migrations = [];        
-
         $pdo = Connection::connect(new MySQL); 
         $env = ENV::getContent();      
 
-        $migrationFiles = scandir(__DIR__ . '/Schema/');
+        $migrations = self::scandirCustom([]);
 
-        foreach ($migrationFiles as $migrate) {
-
-            if ($migrate === '.' || $migrate === '..') {
-                continue; 
-            } 
-
-            if (pathinfo($migrate, PATHINFO_EXTENSION) === 'php') {
-              $pos = strpos($migrate, '.php');
-              $className = substr($migrate, 0, $pos); 
-
-              $class = "App\\Core\\Migration\\Schema\\". $className;
-
-              if (class_exists($class)) {              
-                 $instance = new $class;
-
-                 if ($instance instanceof Migrations && method_exists($instance,'up')) {
-                     $migrations[] = strtolower($className); 
-                 }                            
-              } 
-            }
-        } 
         $migrations[] = 'migrations'; 
         $placeHolders = implode(",",array_fill(0, count($migrations), '?'));
 
-        $sql = "SELECT table_name FROM information_schema.tables
-        WHERE table_schema = '".ENV::$config["DATABASE"]."'"; 
+        $sql = self::queryTable(ENV::$config["DATABASE"],'',false);
 
         $data = $pdo->prepare($sql); 
-        $data->execute(); 
+        $data->execute([ENV::$config["DATABASE"]]); 
         $countTables = $data->fetchAll(\PDO::FETCH_COLUMN);  
 
         if (count($countTables) !== count($migrations)) {
@@ -144,7 +152,6 @@ abstract class Migrations implements Migration
 
         return $countTables; 
     }
-  
 
 } 
 

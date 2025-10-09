@@ -46,12 +46,17 @@ class TaskManager
      */
     public function cleanMigrations() 
     {
-       $check = Migrations::cleanMigrationsIfFilesNotExists();  
+       $check = Migrations::removeOrphanTables();  
        if (!is_array($check) && $check === false) {
           exit('clean migration is success!'); 
        }else {
           exit('nothing to clean' . PHP_EOL); 
         }
+    }
+
+    public function downMigrations() 
+    {
+       Migrations::downAllTables();
     }
 }
 
