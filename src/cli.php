@@ -13,6 +13,7 @@ if (!$val) {
 
 $result = match ($val) {
     'migrate:all' => $task->upAllMigrations(), 
+    'migrate:clean' => $task->cleanMigrations(), 
 }; 
 // var_dump($result); 
  
