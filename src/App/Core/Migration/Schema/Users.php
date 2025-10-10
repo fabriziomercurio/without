@@ -9,8 +9,8 @@ use App\Core\Builders\TableBuilder;
 
 class Users extends Migrations
 {         
-    public function up(string $table) 
-    {   
+    public function up(string $table) : bool 
+    {             
         $obj = new TableBuilder; 
         $obj->table($table)
         ->addColumn('id', 'int AUTO_INCREMENT PRIMARY KEY', false)
@@ -22,11 +22,11 @@ class Users extends Migrations
         ->addColumn('city', 'varchar(255)')
         ->timestamps();
         $query = $obj->builder();
-        $this->pdo->prepare($query)->execute();  
+        return $this->pdo->prepare($query)->execute();
     } 
 
-    public function down(string $table) 
+    public function down(string $table) : bool
     {    
-        $this->downTable($table);
+        return $this->downTable($table);
     }
 }

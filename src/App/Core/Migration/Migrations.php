@@ -33,9 +33,19 @@ abstract class Migrations implements Migration
 
     public function downTable(string $table) : bool
     {    
-        $sql = "DROP TABLE IF EXISTS " . strtolower($table);
+        ENV::getContent();  
+
+        $sql = "SELECT table_name FROM information_schema.tables
+        WHERE table_schema = ? AND table_name = ?"; 
+        $data = $this->pdo->prepare($sql);  
+        $fetch = $data->execute([ENV::$config["DATABASE"],$table]);         
+
+        if (empty($data->fetchAll())) return false; 
+        
+        $sql = "DROP TABLE IF EXISTS " . strtolower($table);      
         $data = $this->pdo->prepare($sql); 
-        return $data->execute();
+        $data->execute(); 
+        return true;   
     } 
 
     public static function downAllTables() 
@@ -57,6 +67,9 @@ abstract class Migrations implements Migration
         exit('db not found');         
     }
 
+    /**
+     * checks if all tables are present in db
+     */
     public static function checkIfTableExists() : array|false
     {
         $pdo = Connection::connect(new MySQL); 
@@ -151,7 +164,7 @@ abstract class Migrations implements Migration
         } 
 
         return $countTables; 
-    }
+    } 
 
 } 
 

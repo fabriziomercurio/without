@@ -31,7 +31,6 @@ class TableBuilder
     {
         $columnSQL =  implode(", ", $this->columns); 
         $query = "CREATE TABLE IF NOT EXISTS {$this->table} ({$columnSQL})"; 
-        $result = $query; 
-        return $result; 
+        return $query;  
     }
 }
