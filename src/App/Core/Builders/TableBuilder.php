@@ -23,7 +23,8 @@ class TableBuilder
 
     public function timestamps() : self
     {        
-        $this->columns[] = "created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";  
+        $this->columns[] = "created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP";  
+        $this->columns[] = "updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP";
         return $this;
     }
 

@@ -23,8 +23,8 @@ class Products extends Migrations
         $this->pdo->prepare($query)->execute(); 
     }
 
-    public function down(string $table) 
+    public function down(string $table) : bool
     {
-        $this->downTable($table);
+        return $this->downTable($table);
     }
 }

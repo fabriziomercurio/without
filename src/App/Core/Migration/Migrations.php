@@ -25,7 +25,7 @@ abstract class Migrations implements Migration
         ->addColumn('id','INT AUTO_INCREMENT PRIMARY KEY', false)
         ->addColumn('name','VARCHAR(255) UNIQUE')
         ->addColumn('batch','INT')
-        ->timestamps(); 
+        ->timestamps();
         $query = $table->builder(); 
         $pdo->prepare($query)->execute(); 
         return $pdo;  
@@ -40,7 +40,7 @@ abstract class Migrations implements Migration
         $data = $this->pdo->prepare($sql);  
         $fetch = $data->execute([ENV::$config["DATABASE"],$table]);         
 
-        if (empty($data->fetchAll())) return false; 
+        if (empty($data->fetch())) return false; 
         
         $sql = "DROP TABLE IF EXISTS " . strtolower($table);      
         $data = $this->pdo->prepare($sql); 
@@ -51,7 +51,7 @@ abstract class Migrations implements Migration
     public static function downAllTables() 
     {
         $pdo = Connection::connect(new MySQL); 
-        $env = ENV::getContent(); 
+        ENV::getContent(); 
 
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ?"; 
@@ -68,12 +68,14 @@ abstract class Migrations implements Migration
     }
 
     /**
-     * checks if all tables are present in db
+     * checks if all tables are present in db 
+     * and if the tables correspondents 
+     * are in the Schema folder syncronized perfectly
      */
-    public static function checkIfTableExists() : array|false
+    public static function checkIfAllTablesExists() : array|false
     {
         $pdo = Connection::connect(new MySQL); 
-        $env = ENV::getContent();      
+        ENV::getContent();      
 
         $migrations = self::scandirCustom([]); 
 
@@ -137,7 +139,7 @@ abstract class Migrations implements Migration
     public static function removeOrphanTables() 
     {
         $pdo = Connection::connect(new MySQL); 
-        $env = ENV::getContent();      
+        ENV::getContent();      
 
         $migrations = self::scandirCustom([]);
 
@@ -165,6 +167,56 @@ abstract class Migrations implements Migration
 
         return $countTables; 
     } 
+
+    public static function insertInMigrationTable(string $table) : bool
+    {  
+        $pdo = Connection::connect(new MySQL); 
+
+        $sql = "SELECT name,batch FROM migrations WHERE name = ?"; 
+        $data = $pdo->prepare($sql);  
+        $fetch = $data->execute([strtolower($table)]);    
+
+        if (!$data->fetch()){
+            $sql = "INSERT INTO migrations (name,batch) VALUES (?,?);"; 
+            $data = $pdo->prepare($sql);  
+            $fetch = $data->execute([strtolower($table),1]); 
+            return true;  
+        }else { 
+            $data = $pdo->prepare($sql);  
+            $fetch = $data->execute([strtolower($table)]); 
+            $fetch = $data->fetchAll();            
+            $sql = "UPDATE migrations SET batch = ? WHERE name = ?"; 
+            foreach ($fetch as $value) {
+                $batch = $value['batch'] + 1;
+                $data = $pdo->prepare($sql);  
+                $fetch = $data->execute([$batch, strtolower($table)]); 
+            }
+            return true;
+        }
+
+        return false; 
+    } 
+
+    public static function deleteInMigrationTable(string $tableName) 
+    { 
+        $pdo = Connection::connect(new MySQL); 
+
+        $sql = "SELECT name FROM migrations WHERE name = ?;";
+
+        $data = $pdo->prepare($sql);  
+        $fetch = $data->execute([strtolower($tableName)]); 
+
+        if ($data->fetch()){
+         $sql = "DELETE FROM migrations WHERE name = ?"; 
+
+         $data = $pdo->prepare($sql);  
+         $fetch = $data->execute([strtolower($tableName)]); 
+         return true; 
+        }else {
+            return false; 
+        }
+
+    }
 
 } 
 
