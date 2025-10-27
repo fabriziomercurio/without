@@ -39,8 +39,8 @@ class TaskMigrations
                         $obj = new $class; 
                         $obj->up($tableName); 
 
-                        $res = Migrations::insertInMigrationTable($tableName);  
-
+                        $res = Migrations::insertInMigrationTable($tableName); 
+                        
                         if ($res === false) exit('migrations table can\'t populates'); 
                      } 
               }

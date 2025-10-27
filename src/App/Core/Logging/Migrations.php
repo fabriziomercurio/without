@@ -66,7 +66,6 @@ abstract class Migrations implements Migration
             Logger::logMigration('migration.log','a+', '' , ' all migrations are down ','deleted_at');
             exit('delete all migrations'); 
         } 
-        Logger::logMigration('migration.log','a+', '' , ' db not found ','deleted_at',false);
         exit('db not found');         
     }
 
