@@ -31,11 +31,6 @@ class Logger
         } 
            
         if ($tableName) { 
-            // $pdo = Connection::connect(new MySQL); 
-            // $stmt = $pdo->prepare("SELECT batch FROM migrations WHERE name=:name"); 
-            // $stmt->execute(['name' => $tableName]);
-            // $result = $stmt->fetch(); 
-            // $batch = 'batch('.$result['batch'].')'; 
             $batch = self::fetchBatch($tableName);
         }
         

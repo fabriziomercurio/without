@@ -33,8 +33,9 @@ class TaskMigrations
                    if($migration === '.' || $migration === '..') continue; 
                      if (str_contains($migration, '.php')) {
                        $pos = strpos($migration, '.php'); 
-                       $tableName = substr($migration, 0, $pos);
-                       $class = "App\\Core\\Migration\\Schema\\". $tableName;       
+                   echo    $tableName = substr($migration, 0, $pos); echo PHP_EOL;  
+                      echo $class = "App\\Core\\Migration\\Schema\\". $tableName;     
+                      echo PHP_EOL;  
                        if (!class_exists($class)) exit('Class $class not found');
                         $obj = new $class; 
                         $obj->up($tableName); 
@@ -115,6 +116,14 @@ class TaskMigrations
             exit('impossible to send a specific table ' . $th->getMessage());
          }
     }
+
+    /**
+     * create an automatic migration file 
+     */
+   public function createMigration(string $string) 
+   {
+      Migrations::createMigration($string); 
+   }
 
 }
 

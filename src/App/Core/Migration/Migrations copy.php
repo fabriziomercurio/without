@@ -99,51 +99,59 @@ abstract class Migrations implements Migration
         return $countTables; 
     } 
 
-    private static function scandirCustom(array $migrations)
-{
-    $schemaDir = __DIR__ . '/../Migration/Schema/';
+    private static function scandirCustom(array $migrations) 
+    { 
+        if (!is_dir(__DIR__ . '/../Migration/Schema/')) {
+            mkdir(__DIR__ . '/../Migration/Schema/', 0755, true);
+        } 
 
-    if (!is_dir($schemaDir)) {
-        mkdir($schemaDir, 0755, true);
-    }
+        $migrationFiles = scandir(__DIR__ . '/Schema/'); 
 
-    $migrationFiles = scandir($schemaDir);
+        foreach ($migrationFiles as $migrate) { 
 
-    foreach ($migrationFiles as $migrate) {
-        if ($migrate === '.' || $migrate === '..') continue;
+            if ($migrate === '.' || $migrate === '..') continue;         
+ 
+            if (pathinfo($migrate, PATHINFO_EXTENSION) === 'php') { 
+             
+//               $pos = strpos($migrate, '.php');
+//         $className = substr($migrate, 0, $pos); 
 
-        if (pathinfo($migrate, PATHINFO_EXTENSION) === 'php') {
-            $className = substr($migrate, 0, strpos($migrate, '.php')); // es: 2025_10_30_160337_create_products_table
+//         /// 
+//         $migrationName = preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $className);
+// echo $class = ucfirst($migrationName); // es: Products  
 
-            // Estrai "products" dal nome file
-            if (preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $className, $matches)) {
-             $class = ucfirst($matches[1]); // es: Products 
-             $fullClass = 'App\Core\Migration\Schema\\' . $class; // es: App\Core\Migration\Schema\Products
 
-                $fullPath = $schemaDir . $migrate;
+$className = substr($migrate, 0, strpos($migrate, '.php')); // es: 2025_10_30_160337_create_products_table
+$migrationName = preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_create_(.+)_table$/', '$2', $className); // es: products
+ $class = ucfirst($migrationName); // es: Products
 
-                if (file_exists($fullPath)) {
-                    require_once $fullPath;
 
-                    if (class_exists($fullClass, false)) { 
-                       $instance = new $fullClass;
+       // $class = "App/Core/Migration/Schema/". $className.".php";
+       echo $migrate . PHP_EOL; 
+echo __DIR__ . '/Schema/' . $migrate; 
 
-                        if ($instance instanceof Migrations && method_exists($instance, 'up')) {
-                            $migrations[] = strtolower($className);
-                        }
-                    } else {
-                        echo "Class `$class` not found in file `$migrate`" . PHP_EOL;
-                    }
-                } else {
-                    echo "File `$fullPath` not found" . PHP_EOL;
-                }
-            } else {
-                echo "format name is invalid: `$migrate`" . PHP_EOL;
-            }
+    //if (file_exists($class)) { 
+     echo $class . PHP_EOL;        
+         //   require_once __DIR__ . '/Schema/' . $migrate;
+     echo 'eccomi'; 
+    //   $migrationName = preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $className);
+       
+        
+        // if (preg_match('/^create_(.+)_table$/', "create_products_table", $matches)) {
+        //     $class = ucfirst($matches[1]); // Output: cards
+        // }
+
+            $instance = new $class;
+
+                if ($instance instanceof Migrations && method_exists($instance,'up')) {
+                    $migrations[] = strtolower($className); 
+                }                            
+            //  } 
+            }    
         }
+
+        return $migrations;
     }
-    return $migrations;
-}
 
     private static function queryTable(string $db, string $placeHolders, bool $condition = false) : string
     {

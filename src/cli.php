@@ -3,7 +3,7 @@
 require_once "autoload.php"; 
 
 $task = new \App\Core\Tasks\TaskMigrations; 
-
+ 
 $val = $argv[1] ?? NULL; 
 
 if (!$val) {
@@ -15,7 +15,8 @@ $commands = ['migrate:all' => 'run all migrations',
 'migrate:clean' => 'delete migrations in table if they are not sync in folder',
 'migrate:down' => 'delete all migrations',
 'migrate:up' => 'up a single migration with name passed like argument',
-'migrate:delete' => 'delete a single migration with name passed like argument']; 
+'migrate:delete' => 'delete a single migration with name passed like argument',
+'create:migration' => 'create an automatic file migration']; 
 
 if (!array_key_exists($val,$commands)) {
     if ($val !== 'commands:all') echo ' il comando non esiste ' . PHP_EOL;   
@@ -33,6 +34,8 @@ try {
     $keys[2] => $task->downMigrations(), // migrate:down
     $keys[3] => isset($argv[2]) ? $task->upSingleMigration($argv[2]) : exit("missing argument" . PHP_EOL), // migrate:up
     $keys[4] => isset($argv[2]) ? $task->deleteSingleMigration($argv[2]) : exit("missing argument" . PHP_EOL), // migrate:delete
+    $keys[5] => isset($argv[2]) ? $task->createMigration($argv[2]) : exit("missing argument" . PHP_EOL)
+
  };
 } catch (\UnhandledMatchError $th) { 
     exit('errore durante l\'esecuzione' . $th->getMessage() . PHP_EOL); 
