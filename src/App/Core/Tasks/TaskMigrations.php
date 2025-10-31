@@ -20,7 +20,8 @@ class TaskMigrations
    * runs all migrations if exists in folder, 
    * except for migrations table that it will run in automatic 
    * upMigrationsTable(), create migrations' table, 
-   * it's necessary for after up the others tables 
+   * it's necessary for after up the others tables,
+   * checkIfAllTablesExists() checks if all tables are present in db
    */
     public function upAllMigrations() 
     { 
@@ -32,17 +33,27 @@ class TaskMigrations
               foreach ($migrations as $migration) {
                    if($migration === '.' || $migration === '..') continue; 
                      if (str_contains($migration, '.php')) {
-                       $pos = strpos($migration, '.php'); 
-                   echo    $tableName = substr($migration, 0, $pos); echo PHP_EOL;  
-                      echo $class = "App\\Core\\Migration\\Schema\\". $tableName;     
-                      echo PHP_EOL;  
-                       if (!class_exists($class)) exit('Class $class not found');
-                        $obj = new $class; 
-                        $obj->up($tableName); 
-
-                        $res = Migrations::insertInMigrationTable($tableName); 
+                      $fileNameMigration = substr($migration, 0, strpos($migration, '.php'));
+                    
+                     if (preg_match('/^20\\d{2}_\\d{2}_\\d{2}_\\d{6}_create_(.+)_table$/', $fileNameMigration, $matches)) {
+                      $class = ucfirst($matches[1]); // class name  
+                     } 
                         
-                        if ($res === false) exit('migrations table can\'t populates'); 
+                      $fullPath = __DIR__ . '/../Migration/Schema/'.$migration;
+                      if(!file_exists($fullPath))  exit("File `$fullPath` not found".PHP_EOL); 
+
+                      require_once $fullPath; 
+
+                      $fullClass = "App\\Core\\Migration\\Schema\\". $class;     
+                
+                      if (!class_exists($fullClass)) exit("Class `$class` not found in file `$migration`"); 
+
+                       $obj = new $fullClass;                        
+                       $obj->up(strtolower($class)); 
+  
+                       $res = Migrations::insertInMigrationTable($fileNameMigration); 
+                       
+                       if ($res === false) exit('migrations table can\'t populates'); 
                      } 
               }
                exit('run all migrations success!' . PHP_EOL); 

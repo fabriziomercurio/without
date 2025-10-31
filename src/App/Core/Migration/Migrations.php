@@ -100,7 +100,7 @@ abstract class Migrations implements Migration
     } 
 
     private static function scandirCustom(array $migrations)
-{
+    {
     $schemaDir = __DIR__ . '/../Migration/Schema/';
 
     if (!is_dir($schemaDir)) {
@@ -116,34 +116,28 @@ abstract class Migrations implements Migration
             $className = substr($migrate, 0, strpos($migrate, '.php')); // es: 2025_10_30_160337_create_products_table
 
             // Estrai "products" dal nome file
-            if (preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $className, $matches)) {
+            if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $className, $matches)) exit("format name is invalid: `$migrate`" . PHP_EOL);
+              
              $class = ucfirst($matches[1]); // es: Products 
              $fullClass = 'App\Core\Migration\Schema\\' . $class; // es: App\Core\Migration\Schema\Products
 
                 $fullPath = $schemaDir . $migrate;
 
-                if (file_exists($fullPath)) {
+                if (!file_exists($fullPath)) exit("File `$fullPath` not found" . PHP_EOL);
+                    
                     require_once $fullPath;
 
-                    if (class_exists($fullClass, false)) { 
+                    if (!class_exists($fullClass, false)) exit("Class `$class` not found in file `$migrate`" . PHP_EOL);
+                      
                        $instance = new $fullClass;
 
                         if ($instance instanceof Migrations && method_exists($instance, 'up')) {
                             $migrations[] = strtolower($className);
                         }
-                    } else {
-                        echo "Class `$class` not found in file `$migrate`" . PHP_EOL;
-                    }
-                } else {
-                    echo "File `$fullPath` not found" . PHP_EOL;
-                }
-            } else {
-                echo "format name is invalid: `$migrate`" . PHP_EOL;
             }
         }
-    }
-    return $migrations;
-}
+         return $migrations;
+    }  
 
     private static function queryTable(string $db, string $placeHolders, bool $condition = false) : string
     {
