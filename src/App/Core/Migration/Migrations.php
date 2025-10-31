@@ -215,20 +215,21 @@ abstract class Migrations implements Migration
         return false; 
     } 
 
-    public static function deleteInMigrationTable(string $tableName) 
+    public static function deleteInMigrationTable(string $table) 
     { 
         $pdo = Connection::connect(new MySQL); 
 
         $sql = "SELECT name FROM migrations WHERE name = ?;";
 
         $data = $pdo->prepare($sql);  
-        $fetch = $data->execute([strtolower($tableName)]); 
+        $fetch = $data->execute([strtolower($table)]); 
 
         if ($data->fetch()){
          $sql = "DELETE FROM migrations WHERE name = ?"; 
-
+ 
          $data = $pdo->prepare($sql);  
-         $fetch = $data->execute([strtolower($tableName)]); 
+         $fetch = $data->execute([strtolower($table)]); 
+         Logger::logMigration('migration.log','a+', $table, ' delete with success', 'delete_at');
          return true; 
         }else {
             return false; 
@@ -249,52 +250,49 @@ abstract class Migrations implements Migration
             }
 
             $migrations = scandir(__DIR__ . '/../Migration/Schema/');  
-
            
             foreach ($migrations as $migration) {
               if($migration === '.' || $migration === '..') continue; 
 
-            $migrationName = current(explode(".php",preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $migration))); 
- 
-             if ($string === $migrationName) exit('migration is already exists') ;  
+              $migrationName = current(explode(".php",preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $migration))); 
+      
+             if ($string === $migrationName) exit('migration is already exists'.PHP_EOL) ;  
+          
             } 
 
            $migrationName = preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $string);
-                
+         
             if (file_exists(str_replace("\\","/", "App\\Core\\Migration\\Schema\\". ucfirst($migrationName) . ".php"))) exit('File '.$migrationName.' already exists'); 
             
             $stringFile = date('Y_m_d_His_').$migrationName.'.php'; 
 
             if(empty(preg_match('/^(20)\d{2}_\d{2}_\d{2}_\d{6}_[a-zA-Z0-9_]+\.php$/', $stringFile, $matches))) exit('format is invalid' . PHP_EOL); 
-
-        
-            $content = <<<PHP
-            <?php
-
-            namespace App\Core\Migration\Schema;
-
-            class Cities
-            {
-                public function up()
-                {
-                    // Migration logic here
-                }
-
-                public function down()
-                {
-                    // Rollback logic here
-                }
-            }
-            PHP;
            
+            $nameClass = preg_replace(['/^create_/', '/_table$/'], '', $string);
+            $nameClass = ucfirst($nameClass); 
+
+            require_once __DIR__ . '/../Migration/Templates/migration_template.php';            
+            
+            $content = sprintf($template, $nameClass);
             file_put_contents(dirname(__DIR__) . '/Migration/Schema/'.$stringFile, $content);
-
-
 
         } catch (\Throwable $th) {
             exit('impossible to send a specific table ' . $th->getMessage());
         }
-    }
+    } 
+
+    public static function formatFileNameMigration(string $migration) : array 
+   {
+      if(file_exists($migration)) exit("The file `$migration` does not exist" . PHP_EOL);
+       
+      if (!str_contains($migration, '.php')) exit("this file migration `$migration` does not contains .php at the end".PHP_EOL); 
+       
+      $fileWithoutExtension = substr($migration, 0, strpos($migration, '.php'));
+      
+      if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $fileWithoutExtension, $matches)) exit("format name is invalid: `$migration`" . PHP_EOL); 
+
+      return $matches; 
+   }
 
 } 
 

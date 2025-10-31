@@ -31,7 +31,7 @@ class Logger
         } 
            
         if ($tableName) { 
-            $batch = self::fetchBatch($tableName);
+           $batch = ($tableName) ? self::fetchBatch($tableName) : null;
         }
         
         $fp = fopen($filePath, $mode);
@@ -49,12 +49,15 @@ class Logger
         fclose($fp);
     }
 
-    public static function fetchBatch(string $tableName) : string
+    public static function fetchBatch(string $tableName) : string|bool
     {
        $pdo = Connection::connect(new MySQL); 
        $stmt = $pdo->prepare("SELECT batch FROM migrations WHERE name=:name"); 
        $stmt->execute(['name' => $tableName]);
        $result = $stmt->fetch(); 
-       return 'batch('.$result['batch'].')';      
+       if ($result !== false) {   
+        return 'batch('.$result['batch'].')';
+       }      
+       return false; 
     }
 }
