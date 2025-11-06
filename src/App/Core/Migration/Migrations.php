@@ -54,6 +54,8 @@ abstract class Migrations implements Migration
         $pdo = Connection::connect(new MySQL); 
         ENV::getContent(); 
 
+        self::checkIfDBIsNotEmpty($pdo); 
+
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ?"; 
         $data = $pdo->prepare($sql); 
@@ -292,6 +294,22 @@ abstract class Migrations implements Migration
       if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $fileWithoutExtension, $matches)) exit("format name is invalid: `$migration`" . PHP_EOL); 
 
       return $matches; 
+   } 
+
+   public static function checkIfDBIsNotEmpty(\PDO $pdo) : void 
+   {
+        $sql = "SELECT COUNT(*) AS numero_tabelle
+        FROM information_schema.tables
+        WHERE table_schema = ?"; 
+        $data = $pdo->prepare($sql); 
+        $data->execute([ENV::$config['DATABASE']]); 
+
+        $numberTables = $data->fetchColumn(); 
+
+        if ((int)$numberTables === 0) {
+            Logger::logMigration('migration.log','a+', '' , ' impossible delete all migration because db is already empty ','',false);
+            exit('impossible delete all migration because db is already empty'.PHP_EOL);      
+        }
    }
 
 } 
