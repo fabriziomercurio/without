@@ -1,6 +1,8 @@
 FROM php:8.4.12-apache 
 WORKDIR /var/www/html 
 
+COPY ./src/ /var/www/html/
+
 # Mod Rewrite
 RUN a2enmod rewrite
 

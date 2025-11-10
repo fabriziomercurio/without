@@ -19,6 +19,6 @@ class ProductRepository
         $data->surname = $request->getBody()['surname'];
         $data->age = $request->getBody()['age'];
         $data->city = $request->getBody()['city'];
-        return $data->store($data); 
+        return $data->store($data);     
     }
 }

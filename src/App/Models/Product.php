@@ -6,6 +6,8 @@ use App\Models\Model;
 
 class Product extends Model
 {   
+    public string $firstname; 
+    
     public static function fetchAll() : array
     {   
         return self::fetchAllData('products'); 
