@@ -45,9 +45,9 @@ class TaskSeeders
 
    private function createSeederFile(string $seederName) : void 
    {
-        require_once __DIR__ . '/../Seeder/Templates/seeder_template.php';
+        $template = require __DIR__ . '/../Seeder/Templates/seeder_template.php'; 
         $content = sprintf($template, $seederName); 
-        file_put_contents(dirname(__DIR__) . '/Seeder/'.$seederName.".php", $content);
+        file_put_contents(dirname(__DIR__) . '/Seeder/'.$seederName.".php", $content); 
    }
 
    public function runSeeder(string $seederName) 

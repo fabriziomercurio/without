@@ -14,12 +14,14 @@ class Products extends Migrations
         $obj = new TableBuilder; 
         $obj->table($table)
         ->addColumn('id', 'int AUTO_INCREMENT PRIMARY KEY', false)
-        ->addColumn('firstname', 'varchar(255)')
-        ->addColumn('lastname', 'varchar(255)')
-        ->addColumn('email', 'varchar(255)')
-        ->addColumn('password', 'varchar(255)')
-        ->addColumn('age', 'varchar(255)')
-        ->addColumn('city', 'varchar(255)')
+        ->addColumn('name', 'varchar(255)')
+        ->addColumn('price', 'DECIMAL(10,2)')
+        ->addColumn('category', 'varchar(255)')
+        ->addColumn('description', 'varchar(255)')
+        ->addColumn('available', 'TINYINT(1) NOT NULL DEFAULT 0')
+        ->addColumn('brand', 'varchar(255)')
+        ->addColumn('code', 'varchar(255)') 
+        ->addColumn('weight', 'float')
         ->timestamps();
         $query = $obj->builder();
         return $this->pdo->prepare($query)->execute();

@@ -16,6 +16,7 @@ abstract class Model
         if (!isset(self::$pdo)) {
             return self::$pdo = Connection::connect(new Mysql); 
         }
+        return self::$pdo; 
     } 
 
     public static function fetchAllData(string $table) : array

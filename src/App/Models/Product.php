@@ -6,7 +6,9 @@ use App\Models\Model;
 
 class Product extends Model
 {   
-    public string $firstname; 
+    public string $name, $category, $description, $brand, $code;  
+    public float $price, $weight; 
+    public int $available;
     
     public static function fetchAll() : array
     {   
@@ -21,4 +23,5 @@ class Product extends Model
 }
 
 
-?>
+?> 
+
