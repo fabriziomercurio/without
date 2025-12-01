@@ -36,6 +36,13 @@ abstract class Model
         return true;
     }    
 
+    public static function deleteRecord(int $id, string $table) : bool
+    {       
+        $sth = self::pdo()->prepare("DELETE FROM ".$table." WHERE id = :id");
+        $sth->execute(array('id' => $id));
+        return true;
+    }
+
     public function loadData(array $array) 
     {
         foreach ($array as $key => $value) {

@@ -23,6 +23,11 @@ class Router
     public function post(string $uri, callable|array $callback)  
     {
         $this->routes['POST'][$uri] = $callback; 
+    } 
+
+    public function delete(string $uri, callable|array $callback)  
+    {
+        $this->routes["DELETE"][$uri] = $callback; 
     }
     
     /**
@@ -90,8 +95,7 @@ class Router
             return call_user_func_array($callback,$routeParams); 
         }
 
-        if (is_array($callback) && $_SERVER['REQUEST_METHOD'] === 'GET') { 
-           
+        if (is_array($callback) && $_SERVER['REQUEST_METHOD'] === 'GET') {            
             $callback[0] = new $callback[0];            
             return call_user_func_array($callback,$routeParams); 
         } 
@@ -100,6 +104,11 @@ class Router
             $callback[0] = new $callback[0]; 
             return call_user_func($callback,$this->request); 
         }
+
+        if (is_array($callback) && $_SERVER['REQUEST_METHOD'] === 'DELETE') {                
+            $callback[0] = new $callback[0];            
+            return call_user_func_array($callback,$routeParams); 
+        } 
 
     }
 

@@ -17,5 +17,10 @@ class ProductService
     public function store(Request $request) : bool 
     {
        return $this->productRepository->store($request); 
+    } 
+
+    public function delete(int $id) : bool
+    {
+       return $this->productRepository->delete($id); 
     }
 }

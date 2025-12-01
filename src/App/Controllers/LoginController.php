@@ -38,7 +38,7 @@ class LoginController
                 throw new \Exception("Token non valido");
             }
 
-            if ($this->token->isExpired($payload)) {
+            if (!$this->token->isExpired($payload)) {
                 throw new \Exception("Token scaduto");
             }
            

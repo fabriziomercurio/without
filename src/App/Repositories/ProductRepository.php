@@ -20,5 +20,10 @@ class ProductRepository
         $data->age = $request->getBody()['age'];
         $data->city = $request->getBody()['city'];
         return $data->store($data);     
+    } 
+
+    public function delete(int $id) : bool
+    {
+        return Product::delete($id); 
     }
 }

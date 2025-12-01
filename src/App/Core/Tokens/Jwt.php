@@ -80,8 +80,8 @@ class Jwt implements Token
     public function isExpired(array $payload) : bool
     {
        if (!isset($payload['exp']) || !is_numeric($payload['exp'])) {
-         return true;
+         return false;
        }
-       return time() > $payload['exp'];
+       return time() <= $payload['exp'];
     }
 }

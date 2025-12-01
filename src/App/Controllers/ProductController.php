@@ -7,6 +7,7 @@ use App\Core\Connections\MySQL;
 use App\Models\Product; 
 use App\Core\Request; 
 use App\Services\ProductService; 
+use App\Core\Response;
 
 class ProductController extends Controller 
 {   
@@ -18,8 +19,7 @@ class ProductController extends Controller
     public function show() 
     {   
         $row = $this->productService->fetchAll(); 
-        echo json_encode($row);  // for react front-end 
-        //$this->render->renderView('product',['name' => 'List of Products', 'rows' => $row]);  // for php front-end
+        echo json_encode($row); 
     }
 
     public function edit(string $productId) 
@@ -35,6 +35,17 @@ class ProductController extends Controller
             return ['message' => 'record inserito correttamente', 'code' => 200];
         }else {
             return ['message' => 'inserimento record non riuscito', 'code' => 500];
+        }
+    } 
+
+    public function delete(int $productId)
+    {   
+        $data = $this->productService->delete($productId); 
+
+        if ($data === true) {
+            Response::success('record delete with success');
+        }else {
+            Response::error('record delete failed');
         }
     }
 

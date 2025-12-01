@@ -19,6 +19,11 @@ class Product extends Model
     public function store(object $data) : bool
     {   
         return $this->storeData($data,'products'); 
+    } 
+
+    public static function delete(int $id) : bool
+    {
+       return self::deleteRecord($id,'products'); 
     }
 }
 
