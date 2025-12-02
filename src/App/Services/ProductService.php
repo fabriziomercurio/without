@@ -19,6 +19,16 @@ class ProductService
        return $this->productRepository->store($request); 
     } 
 
+    public function edit(int $id) : bool | array
+    {
+       return $this->productRepository->edit($id); 
+    } 
+
+    public function update(int $id, Request $request) : bool 
+    {
+       return $this->productRepository->update($id,$request); 
+    }
+
     public function delete(int $id) : bool
     {
        return $this->productRepository->delete($id); 

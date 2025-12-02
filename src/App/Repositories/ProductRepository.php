@@ -22,6 +22,16 @@ class ProductRepository
         return $data->store($data);     
     } 
 
+    public function edit(int $id) : bool | array
+    {
+        return Product::edit($id); 
+    } 
+
+    public function update(int $id, Request $request) : bool 
+    {
+       return Product::update($id,$request);  
+    }
+
     public function delete(int $id) : bool
     {
         return Product::delete($id); 

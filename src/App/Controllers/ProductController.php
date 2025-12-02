@@ -22,9 +22,24 @@ class ProductController extends Controller
         echo json_encode($row); 
     }
 
-    public function edit(string $productId) 
+    public function edit(int $productId) 
     {   
-        echo 'id of product ... ' . $productId; 
+        $data = $this->productService->edit($productId); 
+        if ($data !== false) {
+           Response::success('', $data, 200);
+        }else {
+           Response::error('record not found');
+        }        
+    }
+
+    public function update(int $id, Request $request)
+    {
+        $data = $this->productService->update($id,$request); 
+        if ($data !== false) {
+           Response::success('record updated with success', $data, 200);
+        }else {
+           Response::error('record not found');
+        }
     }
 
     public function store(Request $request) 

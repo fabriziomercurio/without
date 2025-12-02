@@ -6,15 +6,18 @@ use App\Core\Response;
 use App\Core\Tokens\GetToken; 
 use App\Core\Tokens\Jwt;
 use App\Services\UserService;
-use App\Core\Env;  
+use App\Core\Env; 
+use App\Core\Tokens\CsrfGenerate;  
 
 class LoginController 
 {   
-    private GetToken $token;
+    private GetToken $token; 
+    private CsrfGenerate $csrf;
 
     public function __construct(private UserService $user = new UserService
     ){
         $this->token = new GetToken(new Jwt(ENV::$config['PRIVATE_KEY']));
+        $this->csrf = new CsrfGenerate; 
     }  
 
     public function doLogin(Request $request) 
@@ -42,7 +45,7 @@ class LoginController
                 throw new \Exception("Token scaduto");
             }
            
-            echo Response::success("ti sei loggato correttamente",['name' =>  $user["firstname"]], 200 , $data); 
+            echo Response::success("ti sei loggato correttamente",['name' =>  $user["firstname"]], 200 , $data, $this->csrf->generate()); 
           }else { 
             echo Response::error("credenziali non valide");
           }

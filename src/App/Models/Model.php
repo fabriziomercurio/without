@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models;  
 use App\Core\Connections\Connection; 
 use App\Core\Connections\MySQL;
+use App\Core\Request; 
 
 abstract class Model 
 {      
@@ -35,6 +36,25 @@ abstract class Model
         self::pdo()->prepare($sql)->execute($data); 
         return true;
     }    
+
+    public static function editRecord(int $id, string $table) : bool | array  
+    {
+        $sql = "SELECT * FROM ".$table." WHERE id = :id";  
+        $sth = self::pdo()->prepare($sql); 
+        $sth->execute(array('id' => $id)); 
+        $result = $sth->fetch(\PDO::FETCH_ASSOC);
+        return $result;
+    }
+
+    public static function updateRecord(int $id, Request $request, string $table) : bool 
+    {   
+        $data = $request->getBody(); 
+        $parameters = implode(",", array_map(function($n){ return $n . " = :" . $n; }, array_keys($data)));  
+        $sql = "UPDATE " . $table . " SET " . $parameters . " WHERE id = :id"; 
+        $sth = self::pdo()->prepare($sql);  
+        $sth->execute(array_merge($data,['id' => $id]));
+        return true;      
+    }
 
     public static function deleteRecord(int $id, string $table) : bool
     {       

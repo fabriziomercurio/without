@@ -19,7 +19,7 @@ class Request
 
     public function getBody() : array
     {       
-      if ($this->getMethod() === 'POST'){        
+      if ($this->getMethod() === 'POST' || $this->getMethod() === 'PUT'){        
         $raw = file_get_contents("php://input");      
         return json_decode($raw, true) ?? [];
       }
