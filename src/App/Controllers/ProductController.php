@@ -44,12 +44,21 @@ class ProductController extends Controller
 
     public function store(Request $request) 
     {
+        $data = new Product; 
+        $data->loadData($request->getBody());
+        $validate = $data->validate(); 
+        
+        if (!empty($validate)) {
+            echo json_encode($validate);
+            exit;
+        } 
+
         $data = $this->productService->store($request); 
 
-        if ($data === true) {
-            return ['message' => 'record inserito correttamente', 'code' => 200];
+        if ($data === true) { 
+            Response::success('record inserted with success', $data, 200);
         }else {
-            return ['message' => 'inserimento record non riuscito', 'code' => 500];
+            Response::error('insert record failed', $data, 400);
         }
     } 
 

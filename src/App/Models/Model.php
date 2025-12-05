@@ -67,24 +67,23 @@ abstract class Model
     {
         foreach ($array as $key => $value) {
             if (property_exists($this,$key)) {
-                $this->{$key} = $value;           
+                $this->{$key} = $value;         
             }
         }
     } 
 
-    public function validate() 
-    {   
+    public function validate() : array
+    {        
         $array = []; 
         foreach ($this->rules() as $attribute => $rules) { 
-            $value = $this->{$attribute}; 
+            $value = $this->{$attribute};  // interpolazione dinamica, se $attribute = "name", diventa $this->name
             foreach ($rules as $rule) {
-                if ($rule === self::RULE_REQUIRED && !$value) {
-                  $array[$attribute] = $this->addError($attribute,$rule); 
-                } 
+              if ($rule === self::RULE_REQUIRED && !$value) {
+                   $array[$attribute] = $this->addError($attribute,$rule); 
+              } 
             }          
-        } 
-        
-         return $array;   
+        }         
+        return $array;   
     }
 
     private function addError(string $attribute, string $rule) 

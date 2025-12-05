@@ -15,11 +15,9 @@ class ProductRepository
     public function store(Request $request) : bool 
     {
         $data = new Product; 
-        $data->name = $request->getBody()['name']; 
-        $data->surname = $request->getBody()['surname'];
-        $data->age = $request->getBody()['age'];
-        $data->city = $request->getBody()['city'];
-        return $data->store($data);     
+        $data->name = $request->getBody()['name'] ?? null; 
+        $data->description = $request->getBody()['description'] ?? null; 
+        return $data->store($data); 
     } 
 
     public function edit(int $id) : bool | array
