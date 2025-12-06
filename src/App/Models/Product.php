@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models; 
 use App\Models\Model; 
 use App\Core\Request;
+use App\Core\Validation; 
 
 class Product extends Model
 {   
@@ -15,12 +16,25 @@ class Product extends Model
     public float $price, $weight; 
     public int $available; 
 
+    public $validation; 
+
+    public function __construct() 
+    {
+        $this->validation = new Validation; 
+    }
+
     protected function rules()
     {
         return [
-            'name' => [self::RULE_REQUIRED], 
-            'description' => [self::RULE_REQUIRED]
+            'name' => [Validation::RULE_REQUIRED], 
+            'description' => [Validation::RULE_REQUIRED]
         ];
+    }
+
+    public function validation(array $data) 
+    {
+        $this->loadData($data); 
+        return $this->validation->validate($this, $this->rules()); 
     }
     
     public static function fetchAll() : array

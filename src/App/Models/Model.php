@@ -10,8 +10,6 @@ abstract class Model
 {      
     protected static \PDO $pdo; 
 
-    protected const RULE_REQUIRED = 'required'; 
-
     public static function pdo() : \PDO
     {        
         if (!isset(self::$pdo)) {
@@ -27,12 +25,13 @@ abstract class Model
         return $stmt->fetchAll(); 
     }   
 
-    public function storeData(object $data, string $table) : bool
+    public function storeData($data, string $table) : bool
     {   
-        $data = (array)$data;          
+        $data = (array)$data; 
+        unset($data['validation']); // rimuovi l'oggetto Validation         
         $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
         $values = implode(",",array_keys($data)); 
-        $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";   
+        $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";
         self::pdo()->prepare($sql)->execute($data); 
         return true;
     }    
@@ -71,32 +70,6 @@ abstract class Model
             }
         }
     } 
-
-    public function validate() : array
-    {        
-        $array = []; 
-        foreach ($this->rules() as $attribute => $rules) { 
-            $value = $this->{$attribute};  // interpolazione dinamica, se $attribute = "name", diventa $this->name
-            foreach ($rules as $rule) {
-              if ($rule === self::RULE_REQUIRED && !$value) {
-                   $array[$attribute] = $this->addError($attribute,$rule); 
-              } 
-            }          
-        }         
-        return $array;   
-    }
-
-    private function addError(string $attribute, string $rule) 
-    {   
-        return $this->getErrors($attribute,$rule)[$rule]; 
-    } 
-
-    private function getErrors(string $attribute, string $rule) 
-    {
-        return [
-            self::RULE_REQUIRED => $attribute.' is ' . $rule,
-        ]; 
-    }
 
 }
 
