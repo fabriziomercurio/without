@@ -22,6 +22,7 @@ class Products extends Migrations
         ->addColumn('brand', 'varchar(255)')
         ->addColumn('code', 'varchar(255)') 
         ->addColumn('weight', 'float')
+        ->addColumn('image', 'varchar(255)')
         ->timestamps();
         $query = $obj->builder();
         return $this->pdo->prepare($query)->execute();

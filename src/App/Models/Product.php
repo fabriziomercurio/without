@@ -13,9 +13,9 @@ class Product extends Model
     public ?string $category = null;
     public ?string $brand = null;
     public ?string $code = null;
+    public ?string $image = null; 
     public float $price, $weight; 
     public int $available; 
-
     public $validation; 
 
     public function __construct() 
@@ -27,7 +27,8 @@ class Product extends Model
     {
         return [
             'name' => [Validation::RULE_REQUIRED], 
-            'description' => [Validation::RULE_REQUIRED]
+            'description' => [Validation::RULE_REQUIRED], 
+            'image' => [Validation::RULE_REQUIRED]
         ];
     }
 
@@ -42,9 +43,9 @@ class Product extends Model
         return self::fetchAllData('products');      
     } 
 
-    public function store(object $data) : bool
+    public function store() : bool
     {   
-        return $this->storeData($data,'products'); 
+        return $this->storeData($this,'products'); 
     } 
 
     public static function edit(int $id) : bool | array 

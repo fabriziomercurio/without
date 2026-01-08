@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Core\Request; 
 use App\Services\ProductService; 
 use App\Core\Response;
+use App\Core\FileUpload; 
 
 class ProductController extends Controller 
 {   
@@ -45,15 +46,18 @@ class ProductController extends Controller
     public function store(Request $request) 
     {
         $data = new Product; 
+        
         $validate = $data->validation($request->getBody()); 
     
-         if (!empty($validate)) {
+        if (!empty($validate)) {
              echo json_encode($validate);
              exit;
-         } 
+        } 
       
         $data = $this->productService->store($request); 
-        
+        if ($data === true) {
+            FileUpload::store("image");  
+        }            
 
         if ($data === true) { 
             Response::success('record inserted with success', $data, 200);

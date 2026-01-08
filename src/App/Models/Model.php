@@ -25,7 +25,7 @@ abstract class Model
         return $stmt->fetchAll(); 
     }   
 
-    public function storeData($data, string $table) : bool
+    public function storeData(Model $data, string $table) : bool
     {   
         $data = (array)$data; 
         unset($data['validation']); // rimuovi l'oggetto Validation         

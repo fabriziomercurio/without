@@ -17,7 +17,7 @@ class ProductRepository
         $data = new Product; 
         $data->name = $request->getBody()['name'] ?? null; 
         $data->description = $request->getBody()['description'] ?? null; 
-        return $data->store($data); 
+        return $data->store(); 
     } 
 
     public function edit(int $id) : bool | array

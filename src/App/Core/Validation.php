@@ -9,15 +9,27 @@ class Validation
     public const RULE_REQUIRED = 'required';  
 
     public function validate(Model $model, array $rules) 
-    {        
+    {    
         $array = []; 
          foreach ($rules as $attribute => $rules) { 
             $value = $model->{$attribute};  // interpolazione dinamica, se $attribute = "name", diventa $this->name
             foreach ($rules as $rule) {
-             if ($rule === self::RULE_REQUIRED && !$value) {
-                  $array[$attribute] = $this->addError($attribute,$rule); 
-               } 
-            }          
+
+            if(!empty($_FILES[$attribute]) && $_FILES[$attribute]['error'] === 0)
+            {
+                continue; 
+            }
+
+              if ($rule === self::RULE_REQUIRED && !$value) {
+                $array[$attribute] = $this->addError($attribute,$rule); 
+              } 
+              
+              if(!empty($_FILES[$attribute]) && $_FILES[$attribute]['error'] !== 0) 
+              {
+                $array[$attribute] = $this->addError($attribute,$rule); 
+              }
+           
+           }          
          }         
         return $array;   
     } 
