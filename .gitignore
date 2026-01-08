@@ -1,5 +1,4 @@
 storage/*
 private.key
 uploads
-src/testing/api/*.jpg 
-src/testing/api/*.png
+src/testing
