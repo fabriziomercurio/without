@@ -5,14 +5,18 @@ namespace App\Controllers;
 use App\Core\Connections\Connection; 
 use App\Core\Connections\MySQL;
 use App\Models\Product; 
+use App\Models\Multimedia;
 use App\Core\Request; 
 use App\Services\ProductService; 
+use App\Services\MultimediaService;
 use App\Core\Response;
 use App\Core\FileUpload; 
+use App\Core\Transaction;
 
 class ProductController extends Controller 
 {   
-    public function __construct(private ProductService $productService = new ProductService) 
+    public function __construct(private ProductService $productService = new ProductService, 
+    private MultimediaService $multimediaService = new MultimediaService) 
     {  
        parent::__construct(); 
     } 
@@ -46,24 +50,31 @@ class ProductController extends Controller
     public function store(Request $request) 
     {
         $data = new Product; 
+        $media = new Multimedia; 
         
-        $validate = $data->validation($request->getBody()); 
+        $body = $request->getBody();
+        $errors = array_merge($data->validation($body),$media->validation($body));       
     
-        if (!empty($validate)) {
-             echo json_encode($validate);
-             exit;
-        } 
-      
-        $data = $this->productService->store($request); 
-        if ($data === true) {
-            FileUpload::store("image");  
-        }            
+        if (!empty($errors)) {
+            echo json_encode($errors);
+            exit;
+        }     
+         
+        Transaction::beginTransaction();  
 
-        if ($data === true) { 
-            Response::success('record inserted with success', $data, 200);
-        }else {
-            Response::error('insert record failed', $data, 400);
-        }
+        try {          
+            $multimediaId = $this->multimediaService->store($request);
+            $request->extra['xMultimediaId'] = $multimediaId; 
+            $data = $this->productService->store($request);            
+
+            FileUpload::store("image");  
+            Transaction::commit();
+            Response::success('record inserted with success', $data, 200);              
+
+        } catch (\Exception $e) { 
+            Response::error($e->getMessage(), null, 400);
+            Transaction::rollBack();
+        }      
     } 
 
     public function delete(int $productId)

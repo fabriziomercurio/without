@@ -14,6 +14,7 @@ class Product extends Model
     public ?string $brand = null;
     public ?string $code = null;
     public ?string $image = null; 
+    public ?string $xMultimediaId = null;
     public float $price, $weight; 
     public int $available; 
     public $validation; 
@@ -21,7 +22,9 @@ class Product extends Model
     public function __construct() 
     {
         $this->validation = new Validation; 
-    }
+    } 
+
+    public array $fillable = ['name','description','xMultimediaId']; 
 
     protected function rules()
     {
@@ -43,7 +46,7 @@ class Product extends Model
         return self::fetchAllData('products');      
     } 
 
-    public function store() : bool
+    public function store() : string|false 
     {   
         return $this->storeData($this,'products'); 
     } 

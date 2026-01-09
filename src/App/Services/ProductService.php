@@ -14,7 +14,7 @@ class ProductService
        return $this->productRepository->fetchAll(); 
     }
 
-    public function store(Request $request) : bool 
+    public function store(Request $request) 
     {
        return $this->productRepository->store($request); 
     } 

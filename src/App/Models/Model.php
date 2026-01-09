@@ -25,15 +25,21 @@ abstract class Model
         return $stmt->fetchAll(); 
     }   
 
-    public function storeData(Model $data, string $table) : bool
+    public function storeData(Model $data, string $table) : string|false 
     {   
-        $data = (array)$data; 
-        unset($data['validation']); // rimuovi l'oggetto Validation         
+        $data = (array)$data;     
+
+        foreach ($data as $key => $value) {            
+            if (!is_scalar($value) && $value !== null) {
+                unset($data[$key]);
+            }
+        }
+
         $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
         $values = implode(",",array_keys($data)); 
         $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";
         self::pdo()->prepare($sql)->execute($data); 
-        return true;
+        return self::pdo()->lastInsertId();
     }    
 
     public static function editRecord(int $id, string $table) : bool | array  

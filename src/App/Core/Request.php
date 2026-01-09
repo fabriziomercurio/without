@@ -5,6 +5,8 @@ namespace App\Core;
 
 class Request 
 {   
+    public array $extra = []; 
+    
     private function getMethod() 
     {
         return $_SERVER['REQUEST_METHOD']; 

@@ -12,11 +12,12 @@ class ProductRepository
         return Product::fetchAll(); 
     } 
 
-    public function store(Request $request) : bool 
+    public function store(Request $request)
     {
         $data = new Product; 
         $data->name = $request->getBody()['name'] ?? null; 
         $data->description = $request->getBody()['description'] ?? null; 
+        $data->xMultimediaId = $request->extra['xMultimediaId'] ?? null;
         return $data->store(); 
     } 
 

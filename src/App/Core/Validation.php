@@ -7,9 +7,11 @@ use App\Models\Model;
 class Validation 
 {
     public const RULE_REQUIRED = 'required';  
+    private $model; 
 
     public function validate(Model $model, array $rules) 
     {    
+        $this->model = $model;  
         $array = []; 
          foreach ($rules as $attribute => $rules) { 
             $value = $model->{$attribute};  // interpolazione dinamica, se $attribute = "name", diventa $this->name
@@ -41,6 +43,10 @@ class Validation
 
     private function getErrors(string $attribute, string $rule) 
     {
+        if (isset($this->model->alias) && isset($this->model->alias[$attribute])) {
+      
+          $attribute = $this->model->alias[$attribute];
+        }
         return [
             self::RULE_REQUIRED => $attribute.' is ' . $rule,
         ]; 

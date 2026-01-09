@@ -23,6 +23,8 @@ class Products extends Migrations
         ->addColumn('code', 'varchar(255)') 
         ->addColumn('weight', 'float')
         ->addColumn('image', 'varchar(255)')
+        ->addColumn('xMultimediaId', 'int')
+        ->foreignKey('xMultimediaId','multimedia','id')    
         ->timestamps();
         $query = $obj->builder();
         return $this->pdo->prepare($query)->execute();

@@ -62,7 +62,8 @@ abstract class Migrations implements Migration
         $res = $data->execute([ENV::$config['DATABASE']]); 
         if ($res) {
             foreach($data->fetchAll(\PDO::FETCH_COLUMN) as $table) 
-            {   
+            {  
+                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0"); // disable foreign key controls                 
                 $pdo->exec('DROP TABLE IF EXISTS ' . $table);                         
             } 
             Logger::logMigration('migration.log','a+', '' , ' all migrations are down ','deleted_at');

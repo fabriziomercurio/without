@@ -13,11 +13,17 @@ class TableBuilder
        $this->table = strtolower($table); 
        return $this; 
     } 
-
+  
     public function addColumn(string $name, string $type, bool $nullable = true) : self
     {
         $null = ($nullable == true) ? "NULL" : "NOT NULL";
         $this->columns[] = "$name $type $null";  
+        return $this;
+    } 
+
+    public function foreignKey(string $column, string $refTable, string $refColumn = 'id') : self
+    {
+        $this->columns[] = "FOREIGN KEY ($column) REFERENCES $refTable($refColumn)"; 
         return $this;
     } 
 
