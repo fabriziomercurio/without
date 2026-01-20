@@ -1,12 +1,15 @@
 services:
   backend:
-    build: . 
-    container_name: backend-php 
+    build: .
+    container_name: backend-php
     ports:
       - "8080:80"
     volumes:
-      - ./src:/var/www/html 
-  
+      - ./src:/var/www/html
+      - ./uploads:/var/www/html/uploads
+    command: > 
+     sh -c "chmod -R 777 /var/www/html/uploads && 
+            apache2-foreground" 
   db: 
     image: mysql:9.4.0 
     environment:       

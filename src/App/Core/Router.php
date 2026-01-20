@@ -97,6 +97,7 @@ class Router
     {   
         if(is_callable($callback)) 
         {  
+            echo 'call'; 
             return call_user_func_array($callback,$routeParams); 
         }
 

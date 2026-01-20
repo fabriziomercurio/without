@@ -10,7 +10,7 @@ use App\Core\Request;
 use App\Services\ProductService; 
 use App\Services\MultimediaService;
 use App\Core\Response;
-use App\Core\FileUpload; 
+use App\Core\ResizeImage; 
 use App\Core\Transaction;
 
 class ProductController extends Controller 
@@ -67,7 +67,7 @@ class ProductController extends Controller
             $request->extra['xMultimediaId'] = $multimediaId; 
             $data = $this->productService->store($request);            
 
-            FileUpload::store("image");  
+            ResizeImage::store("image",[1920, 800, 400]);  
             Transaction::commit();
             Response::success('record inserted with success', $data, 200);              
 
