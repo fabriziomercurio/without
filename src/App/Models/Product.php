@@ -26,12 +26,16 @@ class Product extends Model
 
     public array $fillable = ['name','description','xMultimediaId']; 
 
+    protected function fillable() : array 
+    {
+        return ['name','description','xMultimediaId'] ; 
+    }
+
     protected function rules()
     {
         return [
             'name' => [Validation::RULE_REQUIRED], 
-            'description' => [Validation::RULE_REQUIRED], 
-            'image' => [Validation::RULE_REQUIRED]
+            'description' => [Validation::RULE_REQUIRED]
         ];
     }
 
@@ -48,7 +52,8 @@ class Product extends Model
 
     public function store() : string|false 
     {   
-        return $this->storeData($this,'products'); 
+        $data = $this->getDatabaseAttributes();
+        return $this->storeData($data,'products'); 
     } 
 
     public static function edit(int $id) : bool | array 

@@ -48,26 +48,27 @@ class ProductController extends Controller
     }
 
     public function store(Request $request) 
-    {
+    {   
         $data = new Product; 
         $media = new Multimedia; 
         
         $body = $request->getBody();
-        $errors = array_merge($data->validation($body),$media->validation($body));       
+        
+        $errors = array_merge($data->validation($body),$media->validation($body));
     
         if (!empty($errors)) {
             echo json_encode($errors);
             exit;
         }     
-         
-        Transaction::beginTransaction();  
 
-        try {          
-            $multimediaId = $this->multimediaService->store($request);
+       Transaction::beginTransaction();  
+
+        try {      
+            
+            $multimediaId = $this->multimediaService->store($request); 
             $request->extra['xMultimediaId'] = $multimediaId; 
             $data = $this->productService->store($request);            
-
-            ResizeImage::store("image",[1920, 800, 400]);  
+            // ResizeImage::store("image",[1920, 800, 400]);  
             Transaction::commit();
             Response::success('record inserted with success', $data, 200);              
 

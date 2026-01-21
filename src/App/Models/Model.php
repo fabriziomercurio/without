@@ -25,22 +25,14 @@ abstract class Model
         return $stmt->fetchAll(); 
     }   
 
-    public function storeData(Model $data, string $table) : string|false 
-    {   
-        $data = (array)$data;     
-
-        foreach ($data as $key => $value) {            
-            if (!is_scalar($value) && $value !== null) {
-                unset($data[$key]);
-            }
-        }
-
+    public function storeData($data, string $table) : string|false 
+    {      
         $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
         $values = implode(",",array_keys($data)); 
         $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";
         self::pdo()->prepare($sql)->execute($data); 
         return self::pdo()->lastInsertId();
-    }    
+    } 
 
     public static function editRecord(int $id, string $table) : bool | array  
     {
@@ -77,6 +69,17 @@ abstract class Model
         }
     } 
 
+    protected function getDatabaseAttributes() : array 
+    {  
+       $data = [];  
+       foreach ($this->fillable() as $field) {       
+            $property = $this->alias[$field] ?? $field; 
+            $data[$field] = $this->{$property}; 
+       } 
+       return $data; 
+    } 
+
+    abstract protected function fillable(): array;
 }
 
 

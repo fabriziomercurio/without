@@ -7,7 +7,7 @@ use App\Core\Validation;
 
 class Multimedia extends Model 
 {
-    public ?string $name = null; 
+    public ?string $multi_name = null; 
     public $validation;
 
     public function __construct() 
@@ -15,23 +15,26 @@ class Multimedia extends Model
         $this->validation = new Validation; 
     }
 
-    public array $fillable = ['name']; 
+    protected function fillable() : array 
+    {
+        return ['name'] ; 
+    }
 
-    public array $alias = [
+    protected array $alias = [
         'name' => 'multi_name'
     ];
 
     protected function rules()
     {
         return [
-            'name' => [Validation::RULE_REQUIRED]
+            'multi_name' => [Validation::RULE_REQUIRED]
         ];
     }
 
     public function loadData($data) 
     {
         if (isset($data['multi_name'])) {
-           $this->name = $data['multi_name'];
+           $this->multi_name = $data['multi_name'];
         }
     }
 
@@ -42,8 +45,9 @@ class Multimedia extends Model
     }
 
     public function store() : string|false 
-    {   
-        return $this->storeData($this,'multimedia'); 
+    {      
+       $data = $this->getDatabaseAttributes();
+       return $this->storeData($data,'multimedia');  
     }
 }
 

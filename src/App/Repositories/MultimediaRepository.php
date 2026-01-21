@@ -10,7 +10,7 @@ class MultimediaRepository
     public function store(Request $request) : string|false  
     {
         $data = new Multimedia; 
-        $data->name = $request->getBody()['name'] ?? null; 
+        $data->multi_name = $request->getBody()['multi_name'] ?? null; 
         return $data->store(); 
     } 
 }

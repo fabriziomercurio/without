@@ -4,15 +4,21 @@ Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0g
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="name"
 
-Paoletto 
+Mario 
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="description"
 
-Descrizione testing from Rest Client 
+Description testing from Rest Client 
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="multi_name"
 
-Testing name multi_image
+Testing name image
 
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="Tennis-PNG-Image.png"
+Content-Type: image/png
+
+< ./Tennis-PNG-Image.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
