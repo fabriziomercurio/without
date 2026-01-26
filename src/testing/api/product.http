@@ -16,3 +16,10 @@ Content-Disposition: form-data; name="multi_name"
 
 Testing name multi_image
 
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="image"; filename="Tennis-PNG-Image.png"
+Content-Type: image/png
+
+< ./Tennis-PNG-Image.png
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+

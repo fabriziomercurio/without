@@ -3,22 +3,48 @@ declare(strict_types=1);
 
 namespace App\Models; 
 use App\Models\Model; 
+use App\Core\Validation;
 
 class User extends Model
 {
-    public string $firstname; 
-    public string $lastname;    
-    public string $email; 
-    public string $password;
-    public string $age; 
-    public string $city; 
+    public ?string $firstname = NULL;
+    public ?string $lastname = NULL;   
+    public ?string $email = NULL;
+    public ?string $password = NULL;
+    public ?string $age = NULL; 
+    public ?string $city = NULL; 
+    public Validation $validation; 
+
+    public function __construct() 
+    {
+        $this->validation = new Validation; 
+    }
 
     protected function rules() 
     {
         return [
-            'firstname' => [self::RULE_REQUIRED], 
-            'lastname' => [self::RULE_REQUIRED]
+            'firstname' => [Validation::RULE_REQUIRED], 
+            'lastname' => [Validation::RULE_REQUIRED], 
+            'email' => [Validation::RULE_REQUIRED], 
+            'password' => [Validation::RULE_REQUIRED], 
         ];   
+    } 
+
+    public function validation(array $data) 
+    {
+        $this->loadData($data); 
+        return $this->validation->validate($this, $this->rules()); 
+    }
+
+    public function fillable() : array 
+    {
+        return ['firstname','lastname','email','password','age','city']; 
+    } 
+
+    public function store() : string|false 
+    {   
+        $data = $this->getDatabaseAttributes(); 
+        return $this->storeData($data,'users'); 
     }
 
     

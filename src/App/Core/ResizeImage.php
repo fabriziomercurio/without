@@ -5,6 +5,20 @@ namespace App\Core;
 
 class ResizeImage 
 {
+   public static function hasFile(string $name) : bool 
+   {       
+      if (!isset($_FILES[$name])) { 
+           return false; 
+      } 
+       
+      $image = $_FILES[$name]; 
+
+      if (!empty($image['tmp_name']) && $image['size'] > 0 && $image['error'] === UPLOAD_ERR_OK ) return true; 
+      
+      return false; 
+   } 
+
+
    /**
     * $name string The name attribute specifies a name for an HTML element
     */
@@ -14,6 +28,10 @@ class ResizeImage
      if (count($sizes) !== 3) exit('Image dimensions must be three'); 
        
      $targetDir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/"; 
+
+     foreach ($variable as $key => $size) {
+           $targetDir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/".$size; 
+     }
 
      $file = $_FILES[$name];
 

@@ -54,8 +54,8 @@ class ProductController extends Controller
         
         $body = $request->getBody();
         
-        $errors = array_merge($data->validation($body),$media->validation($body));
-    
+        $errors = array_merge($data->validation($body),$media->validation($body)); 
+
         if (!empty($errors)) {
             echo json_encode($errors);
             exit;
@@ -64,11 +64,20 @@ class ProductController extends Controller
        Transaction::beginTransaction();  
 
         try {      
+
+        if (ResizeImage::hasFile('image')) { 
+
+            $multiName = $request->getBody()['multi_name'] ?? null; 
             
-            $multimediaId = $this->multimediaService->store($request); 
-            $request->extra['xMultimediaId'] = $multimediaId; 
-            $data = $this->productService->store($request);            
-            // ResizeImage::store("image",[1920, 800, 400]);  
+            if ($multiName) { 
+                ResizeImage::store("image",[1920, 800, 400]); 
+                $multimediaId = $this->multimediaService->store($request); 
+                $request->extra['xMultimediaId'] = $multimediaId;
+            }else {
+                echo json_encode(['multi_image' => 'multi image is required if you want insert an image']);
+            }   
+        }           
+            $data = $this->productService->store($request);                     
             Transaction::commit();
             Response::success('record inserted with success', $data, 200);              
 

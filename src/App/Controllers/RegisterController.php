@@ -23,7 +23,14 @@ class RegisterController extends Controller
     public function store(Request $request) 
     {   
         $user = new User; 
-        $user->loadData($request->getBody());       
+        // $user->loadData($request->getBody());     
+        $errors = $user->validation($request->getBody()); 
+
+        if (!empty($errors)) {
+            echo json_encode($errors);
+            exit;
+        } 
+
         $user = $this->registerService->store($request);
         Response::success('Utente registrato con successo',$user);
         //$validate = $user->validate();  

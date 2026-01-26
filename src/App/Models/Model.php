@@ -26,7 +26,7 @@ abstract class Model
     }   
 
     public function storeData($data, string $table) : string|false 
-    {      
+    {   
         $parameters = implode(",", array_map(function($n){ return ":".$n; }, array_keys($data)));  
         $values = implode(",",array_keys($data)); 
         $sql = "INSERT INTO ".$table." (".$values.") VALUES (".$parameters.");";
@@ -66,7 +66,7 @@ abstract class Model
             if (property_exists($this,$key)) {
                 $this->{$key} = $value;         
             }
-        }
+        } 
     } 
 
     protected function getDatabaseAttributes() : array 
@@ -79,6 +79,11 @@ abstract class Model
        return $data; 
     } 
 
+    /**
+     * The fillable is generally used when we have aliases inside the form, 
+     * this is because the contents of the array will dynamically create the fields of the table, 
+     * using an alias in this context would break the table because the names of the fields would not be the same
+     */
     abstract protected function fillable(): array;
 }
 

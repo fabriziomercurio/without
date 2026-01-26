@@ -26,16 +26,16 @@ class Multimedia extends Model
 
     protected function rules()
     {
-        return [
-            'multi_name' => [Validation::RULE_REQUIRED]
-        ];
+         return [];        
     }
 
     public function loadData($data) 
     {
-        if (isset($data['multi_name'])) {
-           $this->multi_name = $data['multi_name'];
-        }
+        foreach ($data as $key => $value) {
+            if (property_exists($this,$key)) {
+              $this->{$key} = $value;         
+            }
+        } 
     }
 
     public function validation(array $data) 
