@@ -16,7 +16,7 @@ class ProductSeeder extends Seeder
             $data = new Product;  
             $data->name = $this->name(); 
             $data->category = $this->categories();
-            $data->description = $this->descriptions();
+            $data->descr = $this->descriptions();
             $data->available = $this->availables() ? 1 : 0; // ternary operator, condition ? true : false;
             $data->brand = $this->brands();
             $data->code = $this->codes();
