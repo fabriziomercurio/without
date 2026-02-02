@@ -17,13 +17,7 @@ class Product extends Model
     public ?string $xMultimediaId = null;
     public float $price, $weight; 
     public int $available; 
-    public $validation; 
-
-    public function __construct() 
-    {
-        $this->validation = new Validation; 
-    } 
-
+    
     public array $fillable = ['name','description','xMultimediaId']; 
 
     protected function fillable() : array 
@@ -46,7 +40,7 @@ class Product extends Model
     public function validation(array $data) : array 
     {   
         $this->loadData($data); 
-        return $this->validation->validate($this, $this->rules()); 
+        return Validation::validate($this, $this->rules()); 
     }
     
     public static function fetchAll() : array

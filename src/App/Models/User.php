@@ -13,12 +13,6 @@ class User extends Model
     public ?string $password = NULL;
     public ?string $age = NULL; 
     public ?string $city = NULL; 
-    public Validation $validation; 
-
-    public function __construct() 
-    {
-        $this->validation = new Validation; 
-    }
 
     protected function rules() 
     {
@@ -33,7 +27,7 @@ class User extends Model
     public function validation(array $data) 
     {
         $this->loadData($data); 
-        return $this->validation->validate($this, $this->rules()); 
+        return Validation::validate($this, $this->rules()); 
     }
 
     public function fillable() : array 

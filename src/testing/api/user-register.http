@@ -5,7 +5,7 @@ Content-Type: application/json
     "firstname": "Fabrizio",
     "lastname": "Mercurio" ,
     "password": "T4bUcchiolo!",
-    "email": "mercurio.fabrizio@gmail.test",
+    "email": "mercurio.fabrizio@gmail.com",
     "city": null 
 }
 

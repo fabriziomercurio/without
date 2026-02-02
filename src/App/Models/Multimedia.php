@@ -8,12 +8,6 @@ use App\Core\Validation;
 class Multimedia extends Model 
 {
     public ?string $multi_name = null; 
-    public $validation;
-
-    public function __construct() 
-    {
-        $this->validation = new Validation; 
-    }
 
     protected function fillable() : array 
     {
@@ -32,7 +26,7 @@ class Multimedia extends Model
     public function validation(array $data) : array 
     {
         $this->loadData($data); 
-        return $this->validation->validate($this, $this->rules()); 
+        return Validation::validate($this,$this->rules());
     }
 
     public function store() : string|false 
