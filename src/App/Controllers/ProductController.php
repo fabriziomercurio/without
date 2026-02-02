@@ -11,6 +11,7 @@ use App\Services\ProductService;
 use App\Services\MultimediaService;
 use App\Core\Response;
 use App\Core\ResizeImage; 
+use App\Core\CompressImage; 
 use App\Core\Transaction;
 
 class ProductController extends Controller 
@@ -70,7 +71,8 @@ class ProductController extends Controller
             $multiName = $request->getBody()['multi_name'] ?? null; 
             
             if ($multiName) { 
-                ResizeImage::store("image",[1920, 800, 400]); 
+                $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
+                CompressImage::run($filenames, $_FILES['image']['type']); 
                 $multimediaId = $this->multimediaService->store($request); 
                 $request->extra['xMultimediaId'] = $multimediaId;
             }else {

@@ -5,6 +5,8 @@ namespace App\Core;
 
 class ResizeImage 
 {
+   private static array $filenames = []; 
+
    public static function hasFile(string $name) : bool 
    {       
       if (!isset($_FILES[$name])) { 
@@ -14,7 +16,7 @@ class ResizeImage
       $image = $_FILES[$name]; 
 
       if (!empty($image['tmp_name']) && $image['size'] > 0 && $image['error'] === UPLOAD_ERR_OK ) return true; 
-      
+
       return false; 
    } 
 
@@ -22,25 +24,21 @@ class ResizeImage
    /**
     * $name string The name attribute specifies a name for an HTML element
     */
-   public static function store(string $name, array $sizes) 
+   public static function store(string $name, array $sizes, string $nameFolder) : array 
    { 
-     
-     if (count($sizes) !== 3) exit('Image dimensions must be three'); 
-       
-     $targetDir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/"; 
+        
+     if (count($sizes) !== 3) throw new \Exception('Image dimensions must be three'); 
 
-     foreach ($variable as $key => $size) {
-           $targetDir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/".$size; 
-     }
+     if(!preg_match('/^[a-zA-Z0-9_-]+$/', $nameFolder)) throw new \Exception('The folder name must not contain any symbols or numbers');
 
-     $file = $_FILES[$name];
-
-     if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
-      
+      $file = $_FILES[$name];
     
-      $tmp = $_FILES[$name]["tmp_name"];   
+      $tmp = $file["tmp_name"];   
 
-      list($width, $height,$type) = getimagesize($tmp); 
+      $info = getimagesize($tmp); 
+      if (!$info) throw new \Exception('Invalid image'); 
+
+      list($width, $height, $type) = $info;
 
       switch ($type) { 
          case IMAGETYPE_JPEG:
@@ -52,19 +50,24 @@ class ResizeImage
 
          break; 
          default: 
-            exit('Unsupported image format');
+            throw new \Exception('Unsupported image format');
       }
 
-
-      $formats = ['max','medium','min'];  
+     $formats = ['max','medium','min'];  
        
-      $unique = uniqid();       
+     $unique = uniqid();       
 
-      foreach ($sizes as $key => $size) { 
+     foreach ($sizes as $key => $size) { 
 
-      $filename = $targetDir . $unique . "_".$formats[$key]."_" . basename($file["name"]); 
+      $targetDir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/".strtolower($nameFolder)."/" . date("d-m-Y") . "/" . $formats[$key] . "/";  
 
-      if ($width > $size) // $width > 1920 o 800 o 400
+      if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);  
+
+      if (!is_int($size)) throw new \Exception('values passed must to be integers'); 
+
+     $filename = $targetDir . $unique . "_".$formats[$key]."_" . basename($file["name"]); 
+
+      if ($width > $size) // $width > 1920 or 800 or 400
          {
             $newWidth = $size;
             $newHeight = intval(($height / $width) * $newWidth);
@@ -86,20 +89,24 @@ class ResizeImage
                   $width, $height
             );
 
-            // //save image 
-            // $filename = $targetDir . $unique . "_".$formats[$key]."_" . basename($file["name"]); 
+            //save image 
             if ($type === IMAGETYPE_PNG) {
-               imagepng($dst, $filename);
+               imagepng($dst, $filename, 9);
             }else{
                imagejpeg($dst, $filename, 90);
             }
-
-            imagedestroy($src);
+           
             imagedestroy($dst);
+
+            self::$filenames[] = $filename; 
+           
          }else {
-            move_uploaded_file($tmp, $filename);
-         }
+            self::$filenames[] = $filename;
+            copy($tmp, $filename);
+         } 
       }    
+        imagedestroy($src);
+        return self::$filenames;  
    }
 }  
 

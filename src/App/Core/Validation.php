@@ -9,11 +9,11 @@ class Validation
     public const RULE_REQUIRED = 'required';  
     private $model; 
 
-    public function validate(Model $model, array $rules) 
-    {    
-        $this->model = $model;  
+    public function validate(Model $model, array $rules) : array 
+    {   
         $array = []; 
          foreach ($rules as $attribute => $rules) { 
+          echo $attribute . PHP_EOL; 
             $value = $model->{$attribute};  // interpolazione dinamica, se $attribute = "name", diventa $this->name
             foreach ($rules as $rule) {
 

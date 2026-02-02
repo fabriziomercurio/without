@@ -61,7 +61,7 @@ abstract class Model
     }
 
     public function loadData(array $array) 
-    {
+    {   
         foreach ($array as $key => $value) {
             if (property_exists($this,$key)) {
                 $this->{$key} = $value;         
@@ -69,11 +69,16 @@ abstract class Model
         } 
     } 
 
+    /* Takes the values ​​from the fillable method 
+       and checks if they match the alias key. 
+       The field is wrapped in $data and records its value, 
+       e.g., $this->alias_name 
+    */ 
     protected function getDatabaseAttributes() : array 
     {  
        $data = [];  
        foreach ($this->fillable() as $field) {       
-            $property = $this->alias[$field] ?? $field; 
+            $property = $this->alias[$field] ?? $field;
             $data[$field] = $this->{$property}; 
        } 
        return $data; 

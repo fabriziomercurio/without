@@ -29,16 +29,7 @@ class Multimedia extends Model
          return [];        
     }
 
-    public function loadData($data) 
-    {
-        foreach ($data as $key => $value) {
-            if (property_exists($this,$key)) {
-              $this->{$key} = $value;         
-            }
-        } 
-    }
-
-    public function validation(array $data) 
+    public function validation(array $data) : array 
     {
         $this->loadData($data); 
         return $this->validation->validate($this, $this->rules()); 

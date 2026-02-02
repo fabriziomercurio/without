@@ -9,7 +9,7 @@ use App\Core\Validation;
 class Product extends Model
 {   
     public ?string $name = null;
-    public ?string $description = null;
+    public ?string $descr = null;
     public ?string $category = null;
     public ?string $brand = null;
     public ?string $code = null;
@@ -29,18 +29,22 @@ class Product extends Model
     protected function fillable() : array 
     {
         return ['name','description','xMultimediaId'] ; 
-    }
+    } 
+
+    protected array $alias = [
+        'description' => 'descr'
+    ];
 
     protected function rules()
     {
         return [
             'name' => [Validation::RULE_REQUIRED], 
-            'description' => [Validation::RULE_REQUIRED]
+            'descr' => [Validation::RULE_REQUIRED]
         ];
     }
 
-    public function validation(array $data) 
-    {
+    public function validation(array $data) : array 
+    {   
         $this->loadData($data); 
         return $this->validation->validate($this, $this->rules()); 
     }
