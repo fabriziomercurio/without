@@ -7,7 +7,8 @@ use App\Core\Validation;
 
 class Multimedia extends Model 
 {
-    public ?string $multi_name = null; 
+    public ?string $multi_name = null;
+    public ?int $id = null;  
 
     protected function fillable() : array 
     {
@@ -29,10 +30,12 @@ class Multimedia extends Model
         return Validation::validate($this,$this->rules());
     }
 
-    public function store() : string|false 
+    public function store() : int|false 
     {      
        $data = $this->getDatabaseAttributes();
-       return $this->storeData($data,'multimedia');  
+       $id = $this->storeData($data,'multimedia');  
+       $this->id = $id !== false ? (int)$id : false; 
+       return $this->id; 
     }
 }
 

@@ -14,7 +14,7 @@ class Product extends Model
     public ?string $brand = null;
     public ?string $code = null;
     public ?string $image = null; 
-    public ?string $xMultimediaId = null;
+    public ?int $xMultimediaId = null;
     public float $price, $weight; 
     public int $available; 
     

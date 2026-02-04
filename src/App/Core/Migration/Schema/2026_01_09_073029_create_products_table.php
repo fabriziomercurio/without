@@ -27,7 +27,7 @@ class Products extends Migrations
         ->foreignKey('xMultimediaId','multimedia','id')    
         ->timestamps();
         $query = $obj->builder();
-        return $this->pdo->prepare($query)->execute();
+        return self::Conn()->prepare($query)->execute();
     } 
 
     public function down(string $table) : bool

@@ -18,7 +18,7 @@ $template = <<<'PHP'
                     ->addColumn('id', 'int AUTO_INCREMENT PRIMARY KEY', false)
                     ->timestamps();
                     $query = $obj->builder();
-                    return $this->pdo->prepare($query)->execute();
+                    return self::Conn()->prepare($query)->execute();
                 } 
 
                 public function down(string $table) : bool

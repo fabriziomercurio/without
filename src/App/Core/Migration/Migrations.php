@@ -11,16 +11,25 @@ use App\Core\Logging\Logger;
 
 abstract class Migrations implements Migration  
 {   
-    protected \PDO $pdo; 
+    // protected \PDO $pdo; 
+    protected static ?\PDO $pdo = null;
 
-    public function __construct() 
+    // public function __construct() 
+    // {
+    //     $this->pdo = Connection::connect(new Mysql); 
+    // } 
+
+    public static function Conn() 
     {
-        $this->pdo = Connection::connect(new Mysql); 
+       
+       if (!self::$pdo) { self::$pdo = Connection::connect(new Mysql); } return self::$pdo;
+        
     }
 
     public static function upMigrationsTable() : \PDO 
     {
-        $pdo = Connection::connect(new Mysql); 
+        // $pdo = Connection::connect(new Mysql); 
+        // var_dump(self::Conn()); 
         $table = new TableBuilder; 
         $table->table('migrations')
         ->addColumn('id','INT AUTO_INCREMENT PRIMARY KEY', false)
@@ -28,8 +37,8 @@ abstract class Migrations implements Migration
         ->addColumn('batch','INT')
         ->timestamps();
         $query = $table->builder(); 
-        $pdo->prepare($query)->execute(); 
-        return $pdo;  
+        self::Conn()->prepare($query)->execute(); 
+        return self::Conn();  
     }
 
     public function downTable(string $table) : bool
@@ -38,33 +47,33 @@ abstract class Migrations implements Migration
 
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ? AND table_name = ?"; 
-        $data = $this->pdo->prepare($sql);  
+        $data = self::Conn()->prepare($sql);  
         $fetch = $data->execute([ENV::$config["DATABASE"],$table]);         
 
         if (empty($data->fetch())) return false; 
         
         $sql = "DROP TABLE IF EXISTS " . strtolower($table);      
-        $data = $this->pdo->prepare($sql); 
+        $data = self::Conn()->prepare($sql); 
         $data->execute(); 
         return true;   
     } 
 
     public static function downAllTables() 
     {
-        $pdo = Connection::connect(new MySQL); 
+        // $pdo = Connection::connect(new MySQL); 
         ENV::getContent(); 
 
-        self::checkIfDBIsNotEmpty($pdo); 
+        self::checkIfDBIsNotEmpty(self::Conn()); 
 
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ?"; 
-        $data = $pdo->prepare($sql); 
+        $data = self::Conn()->prepare($sql); 
         $res = $data->execute([ENV::$config['DATABASE']]); 
         if ($res) {
             foreach($data->fetchAll(\PDO::FETCH_COLUMN) as $table) 
             {  
-                $pdo->exec("SET FOREIGN_KEY_CHECKS = 0"); // disable foreign key controls                 
-                $pdo->exec('DROP TABLE IF EXISTS ' . $table);                         
+                self::Conn()->exec("SET FOREIGN_KEY_CHECKS = 0"); // disable foreign key controls                 
+                self::Conn()->exec('DROP TABLE IF EXISTS ' . $table);                         
             } 
             Logger::logMigration('migration.log','a+', '' , ' all migrations are down ','deleted_at');
             exit('delete all migrations'); 
@@ -91,7 +100,7 @@ abstract class Migrations implements Migration
 
         $sql = self::queryTable(ENV::$config["DATABASE"],$placeHolders, true);
 
-        $data = $pdo->prepare($sql); 
+        $data = self::conn()->prepare($sql); 
         $params = array_merge([ENV::$config["DATABASE"]], $migrations);
         $data->execute($params); 
 
@@ -167,7 +176,7 @@ abstract class Migrations implements Migration
 
         $sql = self::queryTable(ENV::$config["DATABASE"],'',false);
 
-        $data = $pdo->prepare($sql); 
+        $data = self::conn()->prepare($sql); 
         $data->execute([ENV::$config["DATABASE"]]); 
         $countTables = $data->fetchAll(\PDO::FETCH_COLUMN);  
 
@@ -177,7 +186,7 @@ abstract class Migrations implements Migration
 
             foreach ($result as $tableName) {
                 $sql = "DROP TABLE IF EXISTS " . $tableName; 
-                $data = $pdo->prepare($sql); 
+                $data = self::conn()->prepare($sql); 
                 $data->execute(); 
             }
  
@@ -192,23 +201,23 @@ abstract class Migrations implements Migration
         $pdo = Connection::connect(new MySQL); 
 
         $sql = "SELECT name,batch FROM migrations WHERE name = ?"; 
-        $data = $pdo->prepare($sql);  
+        $data = self::conn()->prepare($sql);  
         $fetch = $data->execute([strtolower($table)]);    
 
         if (!$data->fetch()){
             $sql = "INSERT INTO migrations (name,batch) VALUES (?,?);"; 
-            $data = $pdo->prepare($sql);  
+            $data = self::conn()->prepare($sql);  
             $fetch = $data->execute([strtolower($table),1]); 
             Logger::logMigration('migration.log','a+', $table, ' migrate with success');           
             return true;  
         }else { 
-            $data = $pdo->prepare($sql);  
+            $data = self::conn()->prepare($sql);  
             $fetch = $data->execute([strtolower($table)]); 
             $fetch = $data->fetchAll();            
             $sql = "UPDATE migrations SET batch = ? WHERE name = ?"; 
             foreach ($fetch as $value) {
                 $batch = $value['batch'] + 1;
-                $data = $pdo->prepare($sql);  
+                $data = self::conn()->prepare($sql);  
                 $fetch = $data->execute([$batch, strtolower($table)]); 
             }
             Logger::logMigration('migration.log','a+', $table, ' update with success', 'updated_at');
@@ -224,13 +233,13 @@ abstract class Migrations implements Migration
 
         $sql = "SELECT name FROM migrations WHERE name = ?;";
 
-        $data = $pdo->prepare($sql);  
+        $data = self::conn()->prepare($sql);  
         $fetch = $data->execute([strtolower($table)]); 
 
         if ($data->fetch()){
          $sql = "DELETE FROM migrations WHERE name = ?"; 
  
-         $data = $pdo->prepare($sql);  
+         $data = self::conn()->prepare($sql);  
          $fetch = $data->execute([strtolower($table)]); 
          Logger::logMigration('migration.log','a+', $table, ' delete with success', 'delete_at');
          return true; 
@@ -302,7 +311,7 @@ abstract class Migrations implements Migration
         $sql = "SELECT COUNT(*) AS numero_tabelle
         FROM information_schema.tables
         WHERE table_schema = ?"; 
-        $data = $pdo->prepare($sql); 
+        $data = self::conn()->prepare($sql); 
         $data->execute([ENV::$config['DATABASE']]); 
 
         $numberTables = $data->fetchColumn(); 
