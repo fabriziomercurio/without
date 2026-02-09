@@ -13,7 +13,7 @@ class TaskMigrations
 
    public function __construct() 
    {
-      $this->pdo = Connection::connect(new MySQL);
+      Connection::connect(new MySQL); // or Migration::Conn();
    }
 
    /**
@@ -25,11 +25,12 @@ class TaskMigrations
    */
     public function upAllMigrations() 
     { 
-       $check = Migrations::checkIfAllTablesExists(); 
-       if (is_array($check) && $check !== false) exit('nothing to migrate' . PHP_EOL); 
+      try {
+         $check = Migrations::checkIfAllTablesExists();  
+       if (is_array($check) && $check !== false) throw new \Exception('nothing to migrate' . PHP_EOL); 
            $pdo = Migrations::upMigrationsTable(); 
-           if (!is_object($pdo)) exit('error to send migrations'); 
-              $migrations = scandir(__DIR__ . '/../Migration/Schema/');     
+           if ($pdo === false) throw new \Exception('error to send migrations'); 
+              $migrations = scandir(__DIR__ . '/../Migration/Schema/');        
               foreach ($migrations as $migration) {
                    if($migration === '.' || $migration === '..') continue; 
                      if (str_contains($migration, '.php')) {
@@ -40,52 +41,45 @@ class TaskMigrations
                      } 
                         
                       $fullPath = __DIR__ . '/../Migration/Schema/'.$migration;
-                      if(!file_exists($fullPath))  exit("File `$fullPath` not found".PHP_EOL); 
+                      if(!file_exists($fullPath))  throw new \Exception("File `$fullPath` not found".PHP_EOL); 
 
                       require_once $fullPath; 
 
                       $fullClass = "App\\Core\\Migration\\Schema\\". $class;     
                 
-                      if (!class_exists($fullClass)) exit("Class `$class` not found in file `$migration`"); 
+                      if (!class_exists($fullClass)) throw new \Exception("Class `$class` not found in file `$migration`"); 
 
                        $obj = new $fullClass;                        
                        $obj->up(strtolower($class)); 
   
                        $res = Migrations::insertInMigrationTable($matches[1]); 
-                       
-                       if ($res === false) exit('migrations table can\'t populates'); 
+                   
+                       if ($res === false) throw new \Exception('migrations table can\'t populates'); 
                      } 
-              }
-               exit('run all migrations success!' . PHP_EOL); 
+              } 
+               echo json_encode('run all migrations success!' . PHP_EOL);
+      } catch (\Throwable $th) {
+         echo json_encode($th->getMessage().' at line ' . $th->getLine()); 
+      } 
     } 
-    
-    /**
-     * deletes tables if the its files not exists in folders 
-     */
-    public function cleanMigrations() : void
-    {
-       $check = Migrations::removeOrphanTables();  
-       if (!is_array($check) && $check === false) {
-          exit('clean migration is success!'); 
-       }else {
-          exit('nothing to clean' . PHP_EOL); 
-        }
-    }
 
     public function downMigrations() 
-    {
-       Migrations::downAllTables();
+    {      
+      try {
+         Migrations::downAllTables();  
+         echo json_encode('delete all migrations'); 
+      } catch (\Throwable $th) {
+         echo json_encode($th->getMessage());
+      }
     }
 
-    public function upSingleMigration(string $tableName) : void
-    {    
-         $this->pdo->beginTransaction();
-
+    public function upSingleMigration(string $tableName) 
+    {          
          try {
 
-           if (!Migrations::upMigrationsTable()) exit('error to send migration table'); 
+           if (!Migrations::upMigrationsTable()) throw new \Exception('error to send migration table'); 
 
-           if (!is_dir(__DIR__ . '/../Migration/Schema/')) exit('SubFolder Schema in Migration folder doesn\'t exists' . PHP_EOL); 
+           if (!is_dir(__DIR__ . '/../Migration/Schema/')) throw new \Exception('SubFolder Schema in Migration folder doesn\'t exists' . PHP_EOL); 
              
            $migrations = scandir(__DIR__ . '/../Migration/Schema/'); 
 
@@ -94,30 +88,35 @@ class TaskMigrations
 
               $matches = Migrations::formatFileNameMigration($migration); 
 
-              if ($matches[1] === strtolower($tableName)) { 
-                    $fullPath = __DIR__ . '/../Migration/Schema/'.$migration;
+              if (is_array($matches) && $matches[1] === strtolower($tableName)) { 
+             
+                     $fullPath = __DIR__ . '/../Migration/Schema/'.$migration;
+
+                     if(!file_exists($fullPath)) throw new \Exception("The path ".ucfirst($fullPath)." does not exist" . PHP_EOL); 
+                     
                      require_once $fullPath;
-                     $class = "App\\Core\\Migration\\Schema\\". ucfirst($tableName);
-                    if(!class_exists($class)) exit("The class ".ucfirst($tableName)." does not exist" . PHP_EOL); 
+
+                     $class = "App\\Core\\Migration\\Schema\\". ucfirst($tableName); 
+
+                     if(!class_exists($class)) throw new \Exception("The class ".ucfirst($tableName)." does not exist" . PHP_EOL); 
+                     
                      $obj = new $class; 
                      $res = $obj->up(strtolower($tableName));                   
-                     Migrations::insertInMigrationTable($tableName);  
-                     exit($tableName . ' table run with success!' . PHP_EOL);
+                     Migrations::insertInMigrationTable($tableName);                   
+                     echo json_encode($tableName . ' table run with success!' . PHP_EOL);
+                     return; 
                }else {
-                 $except = ucfirst($tableName).' class is not exists for up migrate'.PHP_EOL; 
+                 $except = json_encode(ucfirst($tableName).' class is not exists for up migrate'.PHP_EOL); 
                }                         
            }         
            echo isset($except) ? $except : '';
          } catch (\Throwable $th) {
-           $this->pdo->rollBack(); 
-           exit('impossible to send a specific table ' . $th->getMessage());
+           echo json_encode('impossible to send a specific table ' . $th->getMessage());
          }
     }
 
     public function deleteSingleMigration(string $tableName) : void 
     {  
-         $this->pdo->beginTransaction();
-
          try { 
          $migrations = scandir(__DIR__ . '/../Migration/Schema/');
          foreach ($migrations as $migration) {
@@ -126,22 +125,28 @@ class TaskMigrations
             $matches = Migrations::formatFileNameMigration($migration);          
          
                if ($matches[1] === strtolower($tableName)) {
+
                      $fullPath = __DIR__ . '/../Migration/Schema/'.$migration;
+                     if(!file_exists($fullPath)) throw new \Exception("The path ".ucfirst($fullPath)." does not exist" . PHP_EOL); 
                      require_once $fullPath;
+
                      $class = "App\\Core\\Migration\\Schema\\". ucfirst($tableName);
-                    if(!class_exists($class)) exit("The class ".ucfirst($tableName)." does not exist" . PHP_EOL); 
+                     if(!class_exists($class)) throw new \Exception("The class ".ucfirst($tableName)." does not exist" . PHP_EOL); 
+
                      $obj = new $class; 
                      $res = $obj->down(strtolower($tableName));                   
                      Migrations::deleteInMigrationTable($tableName);   
-                     ($res === true) ? exit(" delete table with success " . PHP_EOL) : exit("no tables to delete " . PHP_EOL); 
+                    if ($res === true) { echo json_encode("delete table with success " . PHP_EOL); } else { throw new \Exception("no tables to delete"); }
+                   
                }else {
-                   $except = ucfirst($tableName).' class is not exists for delete migrate'.PHP_EOL;
+                   $except = throw new \Exception(ucfirst($tableName).' class is not exists for delete migrate'.PHP_EOL);
+                   return;
                }       
             }
          echo isset($except) ? $except : '';
-         } catch (\Throwable $th) {
-            $this->pdo->rollBack(); 
-            exit('impossible to send a specific table ' . $th->getMessage());
+         } catch (\Throwable $th) { 
+            if ($th->getCode() === 1001) echo json_encode($th->getMessage()); return;
+            echo json_encode('impossible to send a specific table ' . $th->getMessage());
          }
     }
 

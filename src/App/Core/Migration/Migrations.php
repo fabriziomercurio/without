@@ -11,25 +11,17 @@ use App\Core\Logging\Logger;
 
 abstract class Migrations implements Migration  
 {   
-    // protected \PDO $pdo; 
     protected static ?\PDO $pdo = null;
-
-    // public function __construct() 
-    // {
-    //     $this->pdo = Connection::connect(new Mysql); 
-    // } 
 
     public static function Conn() 
     {
        
        if (!self::$pdo) { self::$pdo = Connection::connect(new Mysql); } return self::$pdo;
         
-    }
+    } 
 
-    public static function upMigrationsTable() : \PDO 
+    public static function upMigrationsTable() : bool
     {
-        // $pdo = Connection::connect(new Mysql); 
-        // var_dump(self::Conn()); 
         $table = new TableBuilder; 
         $table->table('migrations')
         ->addColumn('id','INT AUTO_INCREMENT PRIMARY KEY', false)
@@ -37,14 +29,12 @@ abstract class Migrations implements Migration
         ->addColumn('batch','INT')
         ->timestamps();
         $query = $table->builder(); 
-        self::Conn()->prepare($query)->execute(); 
-        return self::Conn();  
+        $stmt = self::Conn()->prepare($query); 
+        return $stmt->execute();   
     }
 
     public function downTable(string $table) : bool
     {    
-        ENV::getContent();  
-
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ? AND table_name = ?"; 
         $data = self::Conn()->prepare($sql);  
@@ -58,28 +48,29 @@ abstract class Migrations implements Migration
         return true;   
     } 
 
-    public static function downAllTables() 
+    public static function downAllTables() : bool 
     {
-        // $pdo = Connection::connect(new MySQL); 
-        ENV::getContent(); 
+        try {
+          self::checkIfDBIsNotEmpty(self::Conn()); 
 
-        self::checkIfDBIsNotEmpty(self::Conn()); 
+          $sql = "SELECT table_name FROM information_schema.tables
+          WHERE table_schema = ?"; 
+          $data = self::Conn()->prepare($sql); 
+          $res = $data->execute([ENV::$config['DATABASE']]); 
+        
+              $tables = $data->fetchAll(\PDO::FETCH_COLUMN);
 
-        $sql = "SELECT table_name FROM information_schema.tables
-        WHERE table_schema = ?"; 
-        $data = self::Conn()->prepare($sql); 
-        $res = $data->execute([ENV::$config['DATABASE']]); 
-        if ($res) {
-            foreach($data->fetchAll(\PDO::FETCH_COLUMN) as $table) 
-            {  
-                self::Conn()->exec("SET FOREIGN_KEY_CHECKS = 0"); // disable foreign key controls                 
-                self::Conn()->exec('DROP TABLE IF EXISTS ' . $table);                         
-            } 
-            Logger::logMigration('migration.log','a+', '' , ' all migrations are down ','deleted_at');
-            exit('delete all migrations'); 
-        } 
-        Logger::logMigration('migration.log','a+', '' , ' db not found ','deleted_at',false);
-        exit('db not found');         
+              foreach ($tables as $table) {
+                  self::Conn()->exec("SET FOREIGN_KEY_CHECKS = 0"); // disable foreign key controls                 
+                  self::Conn()->exec('DROP TABLE IF EXISTS ' . $table); 
+              }          
+                                                  
+              Logger::logMigration('migration.log','a+', '' , ' all migrations are down ','deleted_at');
+        
+          return true;
+        } catch (\Throwable $th) {
+            self::removeAnsiCharacter($th); 
+        }
     }
 
     /**
@@ -88,18 +79,16 @@ abstract class Migrations implements Migration
      * are in the Schema folder syncronized perfectly
      */
     public static function checkIfAllTablesExists() : array|false
-    {
-        $pdo = Connection::connect(new MySQL); 
-        ENV::getContent();      
-
+    { 
+       
         $migrations = self::scandirCustom([]); 
- 
+   
         $migrations[] = 'migrations';
 
         $placeHolders = implode(",",array_fill(0, count($migrations), '?'));
 
-        $sql = self::queryTable(ENV::$config["DATABASE"],$placeHolders, true);
-
+        $sql = self::queryTable(ENV::$config["DATABASE"],$placeHolders, true); 
+ 
         $data = self::conn()->prepare($sql); 
         $params = array_merge([ENV::$config["DATABASE"]], $migrations);
         $data->execute($params); 
@@ -113,7 +102,9 @@ abstract class Migrations implements Migration
 
     private static function scandirCustom(array $migrations)
     {
-    $schemaDir = __DIR__ . '/../Migration/Schema/';
+
+    try {
+        $schemaDir = __DIR__ . '/../Migration/Schema/';
 
     if (!is_dir($schemaDir)) {
         mkdir($schemaDir, 0755, true);
@@ -128,18 +119,18 @@ abstract class Migrations implements Migration
             $className = substr($migrate, 0, strpos($migrate, '.php')); // es: 2025_10_30_160337_create_products_table
 
             // Estrai "products" dal nome file
-            if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $className, $matches)) exit("format name is invalid: `$migrate`" . PHP_EOL);
+            if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $className, $matches)) throw new \Exception("format name is invalid: `$migrate`" . PHP_EOL);
               
              $class = ucfirst($matches[1]); // es: Products 
              $fullClass = 'App\Core\Migration\Schema\\' . $class; // es: App\Core\Migration\Schema\Products
 
                 $fullPath = $schemaDir . $migrate;
 
-                if (!file_exists($fullPath)) exit("File `$fullPath` not found" . PHP_EOL);
+                if (!file_exists($fullPath)) throw new \Exception("File `$fullPath` not found" . PHP_EOL);
                     
                     require_once $fullPath;
 
-                    if (!class_exists($fullClass, false)) exit("Class `$class` not found in file `$migrate`" . PHP_EOL);
+                    if (!class_exists($fullClass, false)) throw new \Exception("Class `$class` not found in file `$migrate`" . PHP_EOL);
                       
                        $instance = new $fullClass;
 
@@ -149,6 +140,10 @@ abstract class Migrations implements Migration
             }
         }
          return $migrations;
+    } catch (\Throwable $th) {
+        self::removeAnsiCharacter($th);
+    }
+    
     }  
 
     private static function queryTable(string $db, string $placeHolders, bool $condition = false) : string
@@ -162,44 +157,10 @@ abstract class Migrations implements Migration
         $sql = "SELECT table_name FROM information_schema.tables
         WHERE table_schema = ?".$addToQuery;
         return $sql; 
-    }
-
-    public static function removeOrphanTables() 
-    {
-        $pdo = Connection::connect(new MySQL); 
-        ENV::getContent();      
-
-        $migrations = self::scandirCustom([]);
-
-        $migrations[] = 'migrations'; 
-        $placeHolders = implode(",",array_fill(0, count($migrations), '?'));
-
-        $sql = self::queryTable(ENV::$config["DATABASE"],'',false);
-
-        $data = self::conn()->prepare($sql); 
-        $data->execute([ENV::$config["DATABASE"]]); 
-        $countTables = $data->fetchAll(\PDO::FETCH_COLUMN);  
-
-        if (count($countTables) !== count($migrations)) {
-            
-        $result=array_diff($countTables,$migrations);
-
-            foreach ($result as $tableName) {
-                $sql = "DROP TABLE IF EXISTS " . $tableName; 
-                $data = self::conn()->prepare($sql); 
-                $data->execute(); 
-            }
- 
-            return false; 
-        } 
-
-        return $countTables; 
     } 
 
     public static function insertInMigrationTable(string $table) : bool
     {  
-        $pdo = Connection::connect(new MySQL); 
-
         $sql = "SELECT name,batch FROM migrations WHERE name = ?"; 
         $data = self::conn()->prepare($sql);  
         $fetch = $data->execute([strtolower($table)]);    
@@ -229,8 +190,6 @@ abstract class Migrations implements Migration
 
     public static function deleteInMigrationTable(string $table) 
     { 
-        $pdo = Connection::connect(new MySQL); 
-
         $sql = "SELECT name FROM migrations WHERE name = ?;";
 
         $data = self::conn()->prepare($sql);  
@@ -253,7 +212,7 @@ abstract class Migrations implements Migration
         try {
 
             if (strpos($string, 'create_') !== 0 or str_ends_with($string,'_table') === false){
-               exit("syntax for this argument is not correct: \033[1m\033[3m".$string."\033[0m\n 
+               throw new \Exception("syntax for this argument is not correct: \033[1m\033[3m".$string."\033[0m\n 
                it's correct : \033[1mcreate_\033[3mtablename\033[0m\033[1m_table\033[0m\n");
             }  
 
@@ -268,40 +227,44 @@ abstract class Migrations implements Migration
 
               $migrationName = current(explode(".php",preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $migration))); 
       
-             if ($string === $migrationName) exit('migration is already exists'.PHP_EOL) ;  
+             if ($string === $migrationName) throw new \Exception('migration is already exists'.PHP_EOL) ;  
           
             } 
 
            $migrationName = preg_replace('/^(20\d{2}_\d{2}_\d{2}_\d{6})_/', '', $string);
-         
-            if (file_exists(str_replace("\\","/", "App\\Core\\Migration\\Schema\\". ucfirst($migrationName) . ".php"))) exit('File '.$migrationName.' already exists'); 
-            
+       
             $stringFile = date('Y_m_d_His_').$migrationName.'.php'; 
 
-            if(empty(preg_match('/^(20)\d{2}_\d{2}_\d{2}_\d{6}_[a-zA-Z0-9_]+\.php$/', $stringFile, $matches))) exit('format is invalid' . PHP_EOL); 
+            if(empty(preg_match('/^(20)\d{2}_\d{2}_\d{2}_\d{6}_[a-zA-Z0-9_]+\.php$/', $stringFile, $matches))) throw new \Exception('format is invalid' . PHP_EOL); 
            
             $nameClass = preg_replace(['/^create_/', '/_table$/'], '', $string);
             $nameClass = ucfirst($nameClass); 
 
-            require_once __DIR__ . '/../Migration/Templates/migration_template.php';            
+            $fullPath = __DIR__ . '/../Migration/Templates/migration_template.php';   
+            
+            if(!file_exists($fullPath))  throw new \Exception("File `$fullPath` not found".PHP_EOL); 
+
+            require_once $fullPath; 
             
             $content = sprintf($template, $nameClass);
-            file_put_contents(dirname(__DIR__) . '/Migration/Schema/'.$stringFile, $content);
+            file_put_contents(dirname(__DIR__) . '/Migration/Schema/'.$stringFile, $content); 
+
+            echo json_encode("migration {$stringFile} created with success!");
 
         } catch (\Throwable $th) {
-            exit('impossible to send a specific table ' . $th->getMessage());
+            self::removeAnsiCharacter($th);
         }
     } 
 
     public static function formatFileNameMigration(string $migration) : array 
-   {
-      if(file_exists($migration)) exit("The file `$migration` does not exist" . PHP_EOL);
-       
-      if (!str_contains($migration, '.php')) exit("this file migration `$migration` does not contains .php at the end".PHP_EOL); 
+   { 
+      if(file_exists($migration)) throw new \Exception("The file `$migration` does not exist" . PHP_EOL);
+      
+      if (!str_contains($migration, '.php')) throw new \Exception("this file migration `$migration` does not contains .php at the end".PHP_EOL); 
        
       $fileWithoutExtension = substr($migration, 0, strpos($migration, '.php'));
       
-      if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $fileWithoutExtension, $matches)) exit("format name is invalid: `$migration`" . PHP_EOL); 
+      if (!preg_match('/^20\d{2}_\d{2}_\d{2}_\d{6}_create_(.+)_table$/', $fileWithoutExtension, $matches)) throw new \Exception("format name is invalid: `$migration`" . PHP_EOL); 
 
       return $matches; 
    } 
@@ -318,8 +281,15 @@ abstract class Migrations implements Migration
 
         if ((int)$numberTables === 0) {
             Logger::logMigration('migration.log','a+', '' , ' impossible delete all migration because db is already empty ','',false);
-            exit('impossible delete all migration because db is already empty'.PHP_EOL);      
+            throw new \Exception('impossible delete all migrations because db is already empty'.PHP_EOL);
+               
         }
+   } 
+
+   public static function removeAnsiCharacter($th) 
+   {  
+      $clean = preg_replace('#\\x1b[[][^A-Za-z]*[A-Za-z]#', '',$th->getMessage().' at line '.$th->getLine());
+      echo json_encode(trim($clean)); 
    }
 
 } 
