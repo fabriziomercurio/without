@@ -17,7 +17,8 @@ class ProductRepository
         $data = new Product; 
         $data->name = $request->getBody()['name'] ?? null; 
         $data->descr = $request->getBody()['descr'] ?? null;
-        $data->xMultimediaId = $request->extra['xMultimediaId'] ?? null;
+        $raw = $request->extra['xMultimediaId'] ?? null;
+        $data->xMultimediaId = is_numeric($raw) ? (int)$raw : null; 
         return $data->store(); 
     } 
 

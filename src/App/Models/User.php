@@ -11,15 +11,22 @@ class User extends Model
     public ?string $lastname = NULL;   
     public ?string $email = NULL;
     public ?string $password = NULL;
-    public ?string $age = NULL; 
+    public ?int $age = NULL; 
     public ?string $city = NULL; 
+
+    public string $table = 'users'; 
+
+    protected function getTable(): string 
+    {  
+        return $this->table;    
+    }
 
     protected function rules() 
     {
         return [
             'firstname' => [Validation::RULE_REQUIRED], 
             'lastname' => [Validation::RULE_REQUIRED], 
-            'email' => [Validation::RULE_REQUIRED], 
+            'email' => [[Validation::RULE_REQUIRED],[Validation::RULE_EMAIL_UNIQUE]], 
             'password' => [Validation::RULE_REQUIRED], 
         ];   
     } 
@@ -35,13 +42,12 @@ class User extends Model
         return ['firstname','lastname','email','password','age','city']; 
     } 
 
+    protected array $casts = ['age'=>'int'];
+
     public function store() : string|false 
     {   
         $data = $this->getDatabaseAttributes(); 
-        return $this->storeData($data,'users'); 
+        return $this->storeData($data,$this->table); 
     }
-
-    
-
     
 }

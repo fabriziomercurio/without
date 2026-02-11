@@ -54,7 +54,10 @@ class TaskSeeders
         if (!is_string($template)) { throw new \Exception("template file `$templatePath` must return a string" . PHP_EOL); }
 
         $content = sprintf($template, $seederName); 
-        file_put_contents(dirname(__DIR__) . '/Seeder/'.$seederName.".php", $content); 
+        $file = dirname(__DIR__) . '/Seeder/'.$seederName.".php"; 
+        file_put_contents($file, $content);
+        
+        chmod($file,0777);
         throw new \Exception("file `$seederName` created!".PHP_EOL);  
    }
 

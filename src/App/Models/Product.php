@@ -20,6 +20,13 @@ class Product extends Model
     
     public array $fillable = ['name','description','xMultimediaId']; 
 
+    public string $table = 'products'; 
+
+    protected function getTable(): string 
+    {  
+        return $this->table;    
+    }
+
     protected function fillable() : array 
     {
         return ['name','description','xMultimediaId'] ; 
@@ -66,7 +73,7 @@ class Product extends Model
 
     public static function delete(int $id) : bool
     {
-       return self::deleteRecord($id,'products'); 
+       return self::deleteRecord($id,$this->table); 
     }
 }
 

@@ -17,7 +17,8 @@ class RegisterRepository
         $user->lastname = ucfirst($request->getBody()['lastname']);
         $user->email = $request->getBody()['email'];
         $user->password = password_hash($request->getBody()['password'], PASSWORD_DEFAULT);
-        $user->age = $request->getBody()['age'] ?? null;
+        $raw = $request->getBody()['age'] ?? null;
+        $user->age = is_numeric($raw) ? (int)$raw : null; 
         $user->city = $this->ucfirstSafe($request->getBody()['city'] ?? null);
         return $user->store(); 
     }

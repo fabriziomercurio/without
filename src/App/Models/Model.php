@@ -9,6 +9,9 @@ use App\Core\Request;
 abstract class Model 
 {      
     protected static \PDO $pdo; 
+    
+    abstract protected function getTable(): string; 
+
 
     public static function pdo() : \PDO
     {        
@@ -59,13 +62,17 @@ abstract class Model
         $sth->execute(array('id' => $id));
         return true;
     }
-
+    
+    // settype is the same thing as $value = (int)$value or $value = (string)$value,  but it's dynamic 
     public function loadData(array $array) 
     {   
-        foreach ($array as $key => $value) {
-            if (property_exists($this,$key)) {
+        foreach ($array as $key => $value) { 
+            if (property_exists($this,$key)) {               
+                if (isset($this->casts[$key])) { 
+                  settype($value, $this->casts[$key]); 
+                }
                 $this->{$key} = $value;         
-            }
+           }
         } 
     } 
 
@@ -83,6 +90,13 @@ abstract class Model
        } 
        return $data; 
     } 
+
+    public function findEmail(string $value) 
+    {
+        $stmt = self::pdo()->prepare("SELECT email FROM {$this->table} WHERE email=:email");
+        $stmt->execute(['email' => $value]);
+        return $stmt->fetch();
+    }
 
     /**
      * The fillable is generally used when we have aliases inside the form, 

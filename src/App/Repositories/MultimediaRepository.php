@@ -7,7 +7,7 @@ use App\Core\Request;
 
 class MultimediaRepository 
 {
-    public function store(Request $request) : string|false  
+    public function store(Request $request) : mixed 
     {
         $data = new Multimedia; 
         $data->multi_name = $request->getBody()['multi_name'] ?? null; 
