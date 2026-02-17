@@ -20,11 +20,11 @@ class Product extends Model
     
     public array $fillable = ['name','description','xMultimediaId']; 
 
-    public string $table = 'products'; 
+    public static string $table = 'products'; 
 
     protected function getTable(): string 
     {  
-        return $this->table;    
+        return self::$table;    
     }
 
     protected function fillable() : array 
@@ -52,23 +52,23 @@ class Product extends Model
     
     public static function fetchAll() : array
     {   
-        return self::fetchAllData('products');      
+        return self::fetchAllData(self::$table);      
     } 
 
     public function store() : string|false 
     {   
         $data = $this->getDatabaseAttributes();
-        return $this->storeData($data,'products'); 
+        return $this->storeData($data,self::$table); 
     } 
 
     public static function edit(int $id) : bool | array 
     {
-        return self::editRecord($id, 'products'); 
+        return self::editRecord($id,self::$table); 
     } 
 
     public static function update(int $id, Request $request) : bool 
     {
-        return self::updateRecord($id, $request,'products'); 
+        return self::updateRecord($id, $request,self::$table); 
     }
 
     public static function delete(int $id) : bool

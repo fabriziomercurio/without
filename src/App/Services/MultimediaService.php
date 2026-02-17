@@ -12,7 +12,12 @@ class MultimediaService
     public function store(Request $request) : string|false
     {
        return $this->multimediaRepository->store($request); 
-    }
+    } 
+
+    public function edit(int $id) : bool | array
+    {
+       return $this->multimediaRepository->edit($id);  
+    } 
 }
 
 ?>

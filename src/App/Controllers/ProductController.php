@@ -30,7 +30,17 @@ class ProductController extends Controller
 
     public function edit(int $productId) 
     {   
-        $data = $this->productService->edit($productId); 
+        $data = $this->productService->edit($productId);
+ 
+        if ($data["xMultimediaId"] !== NULL) { 
+           $data['multimedia'] = $this->multimediaService->edit($data["xMultimediaId"]); 
+           $formats = ['max', 'medium', 'min']; 
+
+          foreach ($formats as $value) {           
+             $data['multimedia']['paths'][$value] = "/uploads/images/products/" . date("d-m-Y") . "/" . $value . "/" . $data["multimedia"]["filename"];            
+          }     
+        } 
+
         if ($data !== false) {
            Response::success('', $data, 200);
         }else {
@@ -68,16 +78,11 @@ class ProductController extends Controller
 
         if (ResizeImage::hasFile('image')) { 
 
-            $multiName = $request->getBody()['multi_name'] ?? null; 
-            
-            if ($multiName) { 
-                $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
-                CompressImage::run($filenames, $_FILES['image']['type']); 
-                $multimediaId = $this->multimediaService->store($request); 
-                $request->extra['xMultimediaId'] = $multimediaId;
-            }else {
-                echo json_encode(['multi_image' => 'multi image is required if you want insert an image']);
-            }   
+            $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
+            CompressImage::run($filenames['paths'], $_FILES['image']['type']); 
+            $request->extra['fileimage'] =  $filenames['baseName'];
+            $multimediaId = $this->multimediaService->store($request); 
+            $request->extra['xMultimediaId'] = $multimediaId;   
         }           
             $data = $this->productService->store($request);                     
             Transaction::commit();

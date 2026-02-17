@@ -23,7 +23,6 @@ class RegisterController extends Controller
     public function store(Request $request) 
     {   
         $user = new User; 
-        // $user->loadData($request->getBody());     
         $errors = $user->validation($request->getBody()); 
 
         if (!empty($errors)) {
@@ -33,7 +32,6 @@ class RegisterController extends Controller
 
         $user = $this->registerService->store($request);
         Response::success('Utente registrato con successo',$user);
-        //$validate = $user->validate();  
     }
 }
 ?>

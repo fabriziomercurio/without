@@ -14,7 +14,7 @@ class Multimedia extends Migrations
         $obj = new TableBuilder; 
         $obj->table($table)
         ->addColumn('id', 'int AUTO_INCREMENT PRIMARY KEY', false)
-        ->addColumn('name', 'varchar(255)')
+        ->addColumn('filename', 'varchar(255)')
         ->timestamps();
         $query = $obj->builder();
         return self::Conn()->prepare($query)->execute();

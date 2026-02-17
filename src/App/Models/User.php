@@ -14,11 +14,11 @@ class User extends Model
     public ?int $age = NULL; 
     public ?string $city = NULL; 
 
-    public string $table = 'users'; 
+    public static string $table = 'users'; 
 
     protected function getTable(): string 
     {  
-        return $this->table;    
+        return self::$table;    
     }
 
     protected function rules() 
@@ -47,7 +47,7 @@ class User extends Model
     public function store() : string|false 
     {   
         $data = $this->getDatabaseAttributes(); 
-        return $this->storeData($data,$this->table); 
+        return $this->storeData($data,self::$table); 
     }
     
 }

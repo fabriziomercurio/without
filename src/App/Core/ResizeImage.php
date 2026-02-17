@@ -5,10 +5,9 @@ namespace App\Core;
 
 class ResizeImage 
 {
-   private static array $filenames = []; 
-
+   
    public static function hasFile(string $name) : bool 
-   {       
+   {      
       if (!isset($_FILES[$name])) { 
            return false; 
       } 
@@ -55,7 +54,14 @@ class ResizeImage
 
      $formats = ['max','medium','min'];  
        
-     $unique = uniqid();       
+     $unique = uniqid(); 
+     
+     $baseName = $unique . "_". basename($file["name"]);
+
+     $result = [ 
+      'baseName' => $baseName, 
+      'paths' => [] 
+     ];
 
      foreach ($sizes as $key => $size) { 
 
@@ -65,7 +71,7 @@ class ResizeImage
 
       if (!is_int($size)) throw new \Exception('values passed must to be integers'); 
 
-     $filename = $targetDir . $unique . "_".$formats[$key]."_" . basename($file["name"]); 
+      $filename = $targetDir . $unique . "_". basename($file["name"]); 
 
       if ($width > $size) // $width > 1920 or 800 or 400
          {
@@ -98,15 +104,15 @@ class ResizeImage
            
             imagedestroy($dst);
 
-            self::$filenames[] = $filename; 
+            $result['paths'][$formats[$key]] = $filename;
            
          }else {
-            self::$filenames[] = $filename;
+            $result['paths'][$formats[$key]] = $filename;
             copy($tmp, $filename);
          } 
       }    
         imagedestroy($src);
-        return self::$filenames;  
+        return $result;
    }
 }  
 

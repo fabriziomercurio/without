@@ -10,20 +10,20 @@ class Multimedia extends Model
     public ?string $multi_name = null;
     public ?int $id = null; 
     
-    public string $table = 'multimedia'; 
+    public static string $table = 'multimedia'; 
 
     protected function getTable(): string 
     {  
-        return $this->table;    
+        return self::$table;    
     }
 
     protected function fillable() : array 
     {
-        return ['name'] ; 
+        return ['filename'] ; 
     }
 
     protected array $alias = [
-        'name' => 'multi_name'
+        'filename' => 'multi_name'
     ];
 
     protected function rules()
@@ -40,9 +40,14 @@ class Multimedia extends Model
     public function store() : int|false 
     {      
        $data = $this->getDatabaseAttributes();
-       $id = $this->storeData($data,$this->table);  
+       $id = $this->storeData($data,self::$table);  
        $this->id = $id !== false ? (int)$id : false; 
        return $this->id; 
+    }
+
+    public static function edit(int $id) 
+    {
+       return self::editRecord($id,self::$table); 
     }
 }
 

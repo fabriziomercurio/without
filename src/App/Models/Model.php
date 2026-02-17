@@ -12,7 +12,6 @@ abstract class Model
     
     abstract protected function getTable(): string; 
 
-
     public static function pdo() : \PDO
     {        
         if (!isset(self::$pdo)) {
@@ -93,7 +92,7 @@ abstract class Model
 
     public function findEmail(string $value) 
     {
-        $stmt = self::pdo()->prepare("SELECT email FROM {$this->table} WHERE email=:email");
+        $stmt = self::pdo()->prepare("SELECT email FROM {$this->getTable()} WHERE email=:email");
         $stmt->execute(['email' => $value]);
         return $stmt->fetch();
     }
