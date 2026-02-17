@@ -5,6 +5,8 @@ namespace App\Core;
 
 class Request 
 {   
+    public array $extra = []; 
+    
     private function getMethod() 
     {
         return $_SERVER['REQUEST_METHOD']; 
@@ -19,8 +21,13 @@ class Request
 
     public function getBody() : array
     {       
-      if ($this->getMethod() === 'POST' || $this->getMethod() === 'PUT'){        
-        $raw = file_get_contents("php://input");      
+      if (!empty($_POST)) { 
+        return $_POST;
+      }
+      
+      if ($this->getMethod() === 'POST' || $this->getMethod() === 'PUT'){  
+              
+        $raw = file_get_contents("php://input");
         return json_decode($raw, true) ?? [];
       }
         return []; 

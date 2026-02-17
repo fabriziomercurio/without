@@ -15,7 +15,7 @@ class MySQL implements Database
             $conn = new \PDO('mysql:dbname='.ENV::$config['DATABASE'].';host='.ENV::$config['HOST'], ENV::$config['USER'],ENV::$config['PASSWORD']); 
             return $conn; 
         } catch (\Throwable $th) {
-             die("Impossibile stabilire una connessione al db " . $th->getMessage());
+             throw new \Exception("Unable to establish a connection to the database " . $th->getMessage());
         }
     }  
 }

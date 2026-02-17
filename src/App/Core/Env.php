@@ -18,6 +18,8 @@ class Env
 
         $lines = explode("\n",$file); 
 
+        $data = []; 
+
         foreach ($lines as $line) {         
             // Ignore lines starting with "#/*^" and others, or don't have a value after "="
             preg_match('/\w+\=(.*)/',$line,$matches); 
@@ -25,21 +27,17 @@ class Env
             if(isset($matches[1])) 
             {
                 putenv(trim($line)); 
+                [$key, $value] = explode('=', $line, 2); 
+                $data[$key] = trim($value);
             }
         }
+        return $data; 
     } 
 
     public static function getContent() 
     {
-        $data = self::setContent();  
-        self::$config['HOST'] = getenv('HOST'); 
-        self::$config['USER'] = getenv('USER');
-        self::$config['DATABASE'] = getenv('DATABASE');
-        self::$config['PASSWORD'] = getenv('PASSWORD');
-        self::$config['PUBLIC_KEY'] = getenv('PUBLIC_KEY');
-        self::$config['PRIVATE_KEY'] = getenv('PRIVATE_KEY');
+        self::$config = self::setContent();
     } 
-
 } 
 
 

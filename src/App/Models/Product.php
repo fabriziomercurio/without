@@ -9,57 +9,71 @@ use App\Core\Validation;
 class Product extends Model
 {   
     public ?string $name = null;
-    public ?string $description = null;
+    public ?string $descr = null;
     public ?string $category = null;
     public ?string $brand = null;
     public ?string $code = null;
+    public ?string $image = null; 
+    public ?int $xMultimediaId = null;
     public float $price, $weight; 
     public int $available; 
+    
+    public array $fillable = ['name','description','xMultimediaId']; 
 
-    public $validation; 
+    public static string $table = 'products'; 
 
-    public function __construct() 
-    {
-        $this->validation = new Validation; 
+    protected function getTable(): string 
+    {  
+        return self::$table;    
     }
+
+    protected function fillable() : array 
+    {
+        return ['name','description','xMultimediaId'] ; 
+    } 
+
+    protected array $alias = [
+        'description' => 'descr'
+    ];
 
     protected function rules()
     {
         return [
             'name' => [Validation::RULE_REQUIRED], 
-            'description' => [Validation::RULE_REQUIRED]
+            'descr' => [Validation::RULE_REQUIRED]
         ];
     }
 
-    public function validation(array $data) 
-    {
+    public function validation(array $data) : array 
+    {   
         $this->loadData($data); 
-        return $this->validation->validate($this, $this->rules()); 
+        return Validation::validate($this, $this->rules()); 
     }
     
     public static function fetchAll() : array
     {   
-        return self::fetchAllData('products');      
+        return self::fetchAllData(self::$table);      
     } 
 
-    public function store(object $data) : bool
+    public function store() : string|false 
     {   
-        return $this->storeData($data,'products'); 
+        $data = $this->getDatabaseAttributes();
+        return $this->storeData($data,self::$table); 
     } 
 
     public static function edit(int $id) : bool | array 
     {
-        return self::editRecord($id, 'products'); 
+        return self::editRecord($id,self::$table); 
     } 
 
     public static function update(int $id, Request $request) : bool 
     {
-        return self::updateRecord($id, $request,'products'); 
+        return self::updateRecord($id, $request,self::$table); 
     }
 
     public static function delete(int $id) : bool
     {
-       return self::deleteRecord($id,'products'); 
+       return self::deleteRecord($id,$this->table); 
     }
 }
 

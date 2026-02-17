@@ -92,59 +92,26 @@ trait Faker
         'MS-WEB-HD', 'HP-LASER-WF', 'TPL-ROUTER-DB', 'ANK-PB-20K', 'DEL-NB-I7',
         'GAR-GPS-WATCH', 'JBL-SPK-BT', 'BLUE-MIC-USB', 'UGR-HUB-7P', 'NUL-LAP-STD'
      ], 
+
+     $name_images = [
+        'image1',
+        'image2',
+        'image3',
+        'image4', 
+        'image5',
+        'image6'
+     ],
      
      $weights = [ 
         0.9, 4.5, 0.2, 0.05, 0.3,
         0.15, 6.0, 0.8, 0.4, 2.2,
         0.1, 0.6, 0.7, 0.3, 1.1
     ];
-      
-    public function name() 
-    {
-        $key = array_rand($this->names);
-        return $this->names[$key];
-    } 
 
-    public function prices() 
+    public function randomValues(array $array) : mixed 
     {
-        $key = array_rand($this->prices);
-        return $this->prices[$key];
-    } 
-
-    public function categories() 
-    {
-        $key = array_rand($this->categories);
-        return $this->categories[$key];
-    } 
-
-    public function descriptions() 
-    {
-        $key = array_rand($this->descriptions);
-        return $this->descriptions[$key];
-    } 
-
-    public function availables() 
-    {
-        $key = array_rand($this->availables);
-        return $this->availables[$key];
-    } 
-
-    public function brands() 
-    {
-        $key = array_rand($this->brands);
-        return $this->brands[$key];
-    } 
-
-    public function codes() 
-    {
-        $key = array_rand($this->codes);
-        return $this->codes[$key];
-    } 
-
-    public function weights() 
-    {
-        $key = array_rand($this->weights);
-        return $this->weights[$key];
+        $key = array_rand($array); 
+        return $array[$key]; 
     }
     
 }
