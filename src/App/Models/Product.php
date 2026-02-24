@@ -66,9 +66,10 @@ class Product extends Model
         return self::editRecord($id,self::$table); 
     } 
 
-    public static function update(int $id, Request $request) : bool 
-    {
-        return self::updateRecord($id, $request,self::$table); 
+    public function update(int $id, Request $request) : bool 
+    {   
+        $data = $this->getMapRequestAttributes($request->getBody());
+        return self::updateRecord($id, $data, self::$table); 
     }
 
     public static function delete(int $id) : bool

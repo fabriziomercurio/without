@@ -6,8 +6,10 @@ use App\Core\Request;
 
 class ProductService 
 {      
-    public function __construct(private ProductRepository $productRepository = new ProductRepository) 
-    {} 
+    public function __construct(private ?ProductRepository $productRepository = null) 
+    {
+        $this->productRepository = $productRepository ?? new ProductRepository;     
+    } 
 
     public function fetchAll() : array
     {

@@ -16,9 +16,11 @@ use App\Core\Transaction;
 
 class ProductController extends Controller 
 {   
-    public function __construct(private ProductService $productService = new ProductService, 
-    private MultimediaService $multimediaService = new MultimediaService) 
+    public function __construct(private ?ProductService $productService = null, 
+    private ?MultimediaService $multimediaService = null) 
     {  
+       $this->productService = $productService ?? new ProductService; 
+       $this->multimediaService = $multimediaService ?? new MultimediaService;
        parent::__construct(); 
     } 
 
@@ -35,9 +37,12 @@ class ProductController extends Controller
         if ($data["xMultimediaId"] !== NULL) { 
            $data['multimedia'] = $this->multimediaService->edit($data["xMultimediaId"]); 
            $formats = ['max', 'medium', 'min']; 
+           
+           $date = explode(' ',$data['multimedia']['updated_at']); 
+           $formatted = (new \DateTime($date[0]))->format("d-m-Y"); 
 
           foreach ($formats as $value) {           
-             $data['multimedia']['paths'][$value] = "/uploads/images/products/" . date("d-m-Y") . "/" . $value . "/" . $data["multimedia"]["filename"];            
+             $data['multimedia']['paths'][$value] = "/uploads/images/products/" . $formatted . "/" . $value . "/" . $data["multimedia"]["filename"];            
           }     
         } 
 
@@ -48,13 +53,85 @@ class ProductController extends Controller
         }        
     }
 
-    public function update(int $id, Request $request)
+    // public function update(int $id, Request $request)
+    // {  
+    //     $data = $this->productService->update($id,$request); 
+    //     if ($data !== false) {
+    //        Response::success('record updated with success', $data, 200);
+    //     }else {
+    //        Response::error('record not found');
+    //     }
+    // } 
+
+    public function update(int $id, Request $request) 
     {
-        $data = $this->productService->update($id,$request); 
-        if ($data !== false) {
-           Response::success('record updated with success', $data, 200);
-        }else {
-           Response::error('record not found');
+        $product = new Product; 
+        $media = new Multimedia; 
+
+        $body = $request->getBody(); 
+
+        $errors = array_merge($product->validation($body),$media->validation($body)); 
+
+        if (!empty($errors)) {
+            echo json_encode($errors); 
+            exit; 
+        } 
+
+        Transaction::beginTransaction();   
+
+        try {         
+
+          $data = $this->productService->update($id,$request); 
+  
+           //se arriva l'immagine, controllo che il nome non sia uguale e l'id si e poi salvo 
+            //quando arriva i record dei prodotti salvo ... 
+           if (ResizeImage::hasFile('image')) { 
+              //se l'immagine viene inviata faccio un controllo se è la stessa, altrimenti carico una nuova 
+          
+               $productId = $this->productService->edit($id); 
+               //se $productId non è null, aggiorno, altrimenti salvo una nuova immagine e salvo il nome nel db 
+                if ($productId["xMultimediaId"] !== null) {
+                 
+                    $multimedia = $this->multimediaService->edit($productId["xMultimediaId"]); 
+            
+                 $parts = explode("_", $multimedia["filename"], 2); 
+                 echo PHP_EOL;
+                 var_dump($parts[1]); 
+                 var_dump($_FILES["image"]["name"]);
+                  echo PHP_EOL;
+                    if ($_FILES["image"]["name"] !== $parts[1] ) {
+                        echo 'non sono uguali quindi vanno aggiornati' . PHP_EOL . PHP_EOL. PHP_EOL;
+                        ///salva fisicamente immagine 
+                       
+                        $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
+                      
+                        CompressImage::run($filenames['paths'], $_FILES['image']['type']); 
+                    
+                        /// salva sulla tabella 
+                    }else {
+                        exit("sono uguali");
+                    }
+                 
+                    //quindi aggiorno; 
+                    
+                } else {
+                     echo 'è null'; exit;
+                }
+                
+            //    $productId["xMultimediaId"];   
+           }
+
+          Transaction::commit();
+          if ($data !== false) {
+             Response::success('record updated with success', $data, 200);
+          }else {
+             Response::error('record not found');
+          }
+
+
+        } catch (\Exception $e) {
+            Response::error($e->getMessage(), null, 400);
+            Transaction::rollBack();
         }
     }
 

@@ -1,4 +1,4 @@
-GET http://localhost:8080/api/product/1
+GET http://localhost:8080/api/product/2
 Content-Type: application/json
 
 

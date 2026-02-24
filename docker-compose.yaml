@@ -10,6 +10,18 @@ services:
     command: > 
      sh -c "chmod -R 777 /var/www/html/uploads && 
             apache2-foreground" 
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2.3
+    restart: always
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root 
+    ports:
+      - "8081:80"
+
   db: 
     image: mysql:9.4.0 
     environment:       

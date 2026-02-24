@@ -37,7 +37,7 @@ class User extends Model
         return Validation::validate($this, $this->rules()); 
     }
 
-    public function fillable() : array 
+    public static function fillable() : array 
     {
         return ['firstname','lastname','email','password','age','city']; 
     } 

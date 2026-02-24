@@ -4,6 +4,9 @@ declare(strict_types=1);
 use App\Controllers\LoginController;
 use App\Controllers\RegisterController; 
 use App\Controllers\ProductController; 
+use App\Middlewares\XHttpMethodOverride;
+
+XHttpMethodOverride::handle();
 
 $router->post('api/login',[LoginController::class,"doLogin"]); 
 $router->post('api/user-register',[RegisterController::class,"store"]);
