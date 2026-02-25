@@ -68,13 +68,14 @@ class Product extends Model
 
     public function update(int $id, Request $request) : bool 
     {   
-        $data = $this->getMapRequestAttributes($request->getBody());
+        $input = array_merge($request->getBody(),$request->extra); 
+        $data = $this->getMapRequestAttributes($input);
         return self::updateRecord($id, $data, self::$table); 
     }
 
-    public static function delete(int $id) : bool
-    {
-       return self::deleteRecord($id,$this->table); 
+    public static function delete(int $id) : bool     
+    {  
+       return self::deleteRecord($id,self::$table); 
     }
 }
 
