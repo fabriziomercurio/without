@@ -28,7 +28,7 @@ class ProductRepository
     } 
 
     public function update(int $id, Request $request) : bool 
-    {
+    {   
        $data = new Product; 
        return $data->update($id,$request);  
     }

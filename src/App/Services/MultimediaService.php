@@ -20,6 +20,16 @@ class MultimediaService
     {
        return $this->multimediaRepository->edit($id);  
     } 
+
+    public function update(int $id, Request $request) : bool 
+    {
+       return $this->multimediaRepository->update($id,$request); 
+    } 
+
+    public function delete(int $id)  
+    {
+       return $this->multimediaRepository->delete($id); 
+    }
 }
 
 ?>

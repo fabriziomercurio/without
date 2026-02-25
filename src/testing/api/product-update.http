@@ -1,4 +1,4 @@
-POST http://localhost:8080/api/product-update/2
+POST http://localhost:8080/api/product-update/12
 X-HTTP-Method-Override: PUT
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
 
@@ -10,12 +10,12 @@ Product Name Testing
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="descr"
 
-Descrizione testing from Rest Client 
+Descrizione testing from Rest Client
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="image"; filename="Tennis_Racket_and_Balls.jpg"
-Content-Type: image/jpeg
+Content-Disposition: form-data; name="image"; filename="Tennis-PNG-Image.png"
+Content-Type: image/png
 
-< ./Tennis_Racket_and_Balls.jpg
+< ./Tennis-PNG-Image.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
 

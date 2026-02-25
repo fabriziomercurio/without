@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Models; 
 use App\Models\Model; 
 use App\Core\Validation;
+use App\Core\Request;
 
 class Multimedia extends Model 
 {
@@ -48,6 +49,19 @@ class Multimedia extends Model
     public static function edit(int $id) 
     {
        return self::editRecord($id,self::$table); 
+    } 
+
+    public function update(int $id, Request $request) : bool 
+    {   
+        $merged = array_merge($request->getBody(),$request->extra); 
+        $data = $this->getMapRequestAttributes($merged);
+          
+        return self::updateRecord($id, $data, self::$table); 
+    } 
+
+    public static function delete(int $id) 
+    {
+        Multimedia::deleteRecord($id, self::$table); 
     }
 }
 

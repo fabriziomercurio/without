@@ -18,6 +18,18 @@ class MultimediaRepository
     {
         return Multimedia::edit($id); 
     } 
+
+    public function update(int $id, Request $request) : bool 
+    { 
+       $data = new Multimedia; 
+       $data->multi_name = $request->extra["filename"] ?? null; 
+       return $data->update($id,$request);  
+    } 
+
+    public function delete(int $id) 
+    {
+        Multimedia::delete($id); 
+    }
 }
 
 ?>

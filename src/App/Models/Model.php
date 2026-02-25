@@ -46,7 +46,7 @@ abstract class Model
     }
 
     public static function updateRecord(int $id, array $data, string $table) : bool 
-    {   
+    {  
         $parameters = implode(",", array_map(function($n){ return $n . " = :" . $n; }, array_keys($data)));  
         $sql = "UPDATE " . $table . " SET " . $parameters . " WHERE id = :id"; 
         $sth = self::pdo()->prepare($sql);  
@@ -94,12 +94,13 @@ abstract class Model
      * it must used with update method  
      */
     protected function getMapRequestAttributes($input) 
-    {      
-        $array = []; 
+    {   
+         $array = []; 
         foreach ($this->fillable() as $field) {
-           $property = $this->alias[$field] ?? $field; 
-           if (array_key_exists($property,$input)) {             
-                $array[$field] = $input[$property]; 
+       $property = $this->alias[$field] ?? $field; 
+       
+           if (array_key_exists($property,$input)) {  
+               $array[$field] = $input[$property]; 
            }
         }
 
