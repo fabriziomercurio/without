@@ -104,7 +104,72 @@ class ProductController extends Controller
                           $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
                           CompressImage::run($filenames['paths'], $_FILES['image']['type']); 
                           $request->extra['multi_name'] = $filenames["baseName"]; 
-                          $this->multimediaService->update($productId["xMultimediaId"], $request); 
+                          //$this->multimediaService->update($productId["xMultimediaId"], $request); // da scommentare se il test va bene
+
+                          /**
+                           * prima dell'update recupero il filename vecchio 
+                           */
+
+                          ///////////////// DA TESTARE
+
+                          $multi = $this->multimediaService->edit($productId["xMultimediaId"]); 
+
+                          if (!empty($multi)) {  
+                         
+                // eliminare anche immagine da disco 
+                //se la cartella esiste 
+                //elimino i file contenenti quel nome 69a0044152595_Tennis-PNG-Image.png 
+                $formats = ['max','medium','min']; 
+
+
+            $date = explode(' ', $multi["created_at"]); 
+            $formattedDate= (new \DateTime($date[0]))->format("d-m-Y");
+
+           $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/"; 
+
+                foreach ($formats as $key => $value) { 
+
+
+                  
+                //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
+                  if (is_dir($dir)) { 
+                    
+                    echo 'trovato' . PHP_EOL; 
+                     echo         $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
+
+                    if (file_exists($file)) { 
+                        unlink($file); 
+                        echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
+                    } 
+
+                 
+
+
+                  } else {
+                    echo 'non trovato' . PHP_EOL; 
+                  }
+                  
+                }  
+
+                // $this->deleteEmptyDirs($dir); 
+                // $request->extra["xMultimediaId"] = null; 
+             
+                $this->productService->update($id,$request); 
+               // $this->multimediaService->delete($productId["xMultimediaId"]); 
+
+               $this->multimediaService->update($productId["xMultimediaId"], $request);
+             
+              } else {
+                echo 'il record multimedia è vuoto ' . PHP_EOL; 
+              }
+
+
+                          /////////////////// fine da testare
+
+                        //   $this->multimediaService->update($productId["xMultimediaId"], $request); 
+
+
+                          
                    
                           /// salva sulla tabella 
                       }else {
@@ -134,7 +199,42 @@ class ProductController extends Controller
               }        
          
               if (!empty($multi)) {  
-             
+                // eliminare anche immagine da disco 
+                //se la cartella esiste 
+                //elimino i file contenenti quel nome 69a0044152595_Tennis-PNG-Image.png 
+                $formats = ['max','medium','min']; 
+
+
+            $date = explode(' ', $multi["created_at"]); 
+            $formattedDate= (new \DateTime($date[0]))->format("d-m-Y");
+
+           $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/"; 
+
+                foreach ($formats as $key => $value) { 
+
+
+                  
+                //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
+                  if (is_dir($dir)) { 
+                    
+                    echo 'trovato' . PHP_EOL; 
+           echo         $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
+
+                    if (file_exists($file)) { 
+                        unlink($file); 
+                        echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
+                    } 
+
+                 
+
+
+                  } else {
+                    echo 'non trovato' . PHP_EOL; 
+                  }
+                  
+                }  
+
+                $this->deleteEmptyDirs($dir); 
                 $request->extra["xMultimediaId"] = null; 
              
                 $this->productService->update($id,$request); 
@@ -204,7 +304,35 @@ class ProductController extends Controller
         }else {
             Response::error('record delete failed');
         }
+    } 
+
+
+
+public function deleteEmptyDirs($dir) {
+    $isEmpty = true;
+
+    foreach (scandir($dir) as $item) {
+        if ($item === '.' || $item === '..') continue;
+
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+        if (is_dir($path)) {
+            if (!$this->deleteEmptyDirs($path)) {
+                $isEmpty = false;
+            }
+        } else {
+            $isEmpty = false;
+        }
     }
+
+    if ($isEmpty) {
+        rmdir($dir);
+    }
+
+    return $isEmpty;
+}
+
+
 
 }
 
