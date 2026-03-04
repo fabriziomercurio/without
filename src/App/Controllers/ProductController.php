@@ -297,12 +297,108 @@ class ProductController extends Controller
 
     public function delete(int $productId)
     {   
-        $data = $this->productService->delete($productId); 
 
-        if ($data === true) {
-            Response::success('record delete with success');
-        }else {
-            Response::error('record delete failed');
+        // $data = $this->productService->delete($productId); 
+
+        // if ($data === true) {
+        //     Response::success('record delete with success');
+        // }else {
+        //     Response::error('record delete failed');
+        // } 
+
+        
+            
+            //edit per verificare se xMultimedia non è null, 
+            $product = $this->productService->edit($productId);
+            if($product == false) throw new \Exception('product id not found'); 
+            $multi = $this->multimediaService->edit($product['xMultimediaId']); 
+
+            $formats = ['max','medium','min']; 
+
+
+            $date = explode(' ', $multi["created_at"]); 
+            $formattedDate= (new \DateTime($date[0]))->format("d-m-Y");
+
+         $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/"; 
+    
+$fileToDelete = []; 
+      foreach ($formats as $key => $value) { 
+
+
+                  
+                //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
+                  if (is_dir($dir)) { 
+                    
+                    echo 'trovato' . PHP_EOL; 
+               $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
+           $fileToDelete[] = $file; 
+
+                    // if (file_exists($file)) { 
+                    //     // unlink($file); 
+                    //     echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
+                    // } 
+
+                 
+
+
+                  } else {
+                    echo 'non trovato' . PHP_EOL; 
+                  }
+                  
+                }  
+
+                Transaction::beginTransaction();
+        try {
+
+            //  $this->multimediaService->delete($product['xMultimediaId']);
+            
+            $this->productService->delete($productId); 
+            $this->multimediaService->delete($product['xMultimediaId']);
+
+              Transaction::commit();
+
+             if(!empty($fileToDelete)) 
+             {
+                foreach ($fileToDelete as $file) {
+                    if(file_exists($file)) 
+                    {  
+                        unlink($file); 
+                        $this->deleteEmptyDirs($dir);
+                        echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
+                    }
+                } 
+
+                echo $dir . PHP_EOL;
+             }
+        
+
+            // prendo xMultimediaId e lo utilizzo per eliminare immagine sia su tabelle e successivamente su disco 
+            // e se si dovesse rompere qualcosa durante l'esecuzione e l'immagine viene eliminata lo stesso?
+            //elimino la tabella figlia, products ...
+           
+            Response::success('record deleted with success', '', 200);
+        } catch (\Exception $e) {
+            Response::error($e->getMessage(), null, 400);
+            Transaction::rollBack();
+        }
+    } 
+
+
+
+public function deleteEmptyDirs($dir) {
+    $isEmpty = true;
+
+    foreach (scandir($dir) as $item) {
+        if ($item === '.' || $item === '..') continue;
+
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+
+        if (is_dir($path)) {
+            if (!$this->deleteEmptyDirs($path)) {
+                $isEmpty = false;
+            }
+        } else {
+            $isEmpty = false;
         }
     } 
 

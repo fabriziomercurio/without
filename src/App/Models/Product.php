@@ -73,9 +73,9 @@ class Product extends Model
         return self::updateRecord($id, $data, self::$table); 
     }
 
-    public static function delete(int $id) : bool
-    {
-       return self::deleteRecord($id,$this->table); 
+    public static function delete(int $id) : bool     
+    {  
+       return self::deleteRecord($id,self::$table); 
     }
 }
 
