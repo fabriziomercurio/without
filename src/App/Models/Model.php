@@ -20,9 +20,9 @@ abstract class Model
         return self::$pdo; 
     } 
 
-    public static function fetchAllData(string $table) : array
-    {
-        $stmt = self::pdo()->prepare("SELECT * FROM ".$table);
+    public static function fetchAllData(string $table, string $orderBy = '') : array
+    { 
+        $stmt = self::pdo()->prepare("SELECT * FROM ".$table." ".$orderBy);
         $stmt->execute(); 
         return $stmt->fetchAll(); 
     }   
@@ -69,7 +69,7 @@ abstract class Model
                 if (isset($this->casts[$key])) { 
                   settype($value, $this->casts[$key]); 
                 }
-                $this->{$key} = $value;         
+                $this->{$key} = $value;  
            }
         } 
     } 

@@ -53,212 +53,15 @@ class ProductController extends Controller
         }        
     }
 
-
-    ///////////////////////////// update temporary  
-
-    public function updateTemporary(Request $request) 
-      { 
-
-          $product = new Product; 
-          $media = new Multimedia;  
-          $body = $request->getBody();
-          $body["id"] = (int)$body["id"]; 
-          $id = $body["id"]; 
-    
-          $errors = array_merge($product->validation($body),$media->validation($body));  
-          if (!empty($errors)) {
-              echo json_encode($errors); 
-              exit; 
-          }  
-
-          Transaction::beginTransaction();    
-          try {          
-             
-        $prod = $this->productService->edit($id); 
-
-        if($prod == false) throw new \Exception("record id not found"); 
-
-            $data = $this->productService->update($id,$request); 
- 
-             //se arriva l'immagine, controllo che il nome non sia uguale e l'id si e poi salvo 
-              //quando arriva i record dei prodotti salvo ... 
-           $productId = $this->productService->edit($id);
-          
-            // echo PHP_EOL;
-             if (ResizeImage::hasFile('image')) { 
-                //se l'immagine viene inviata faccio un controllo se è la stessa, altrimenti carico una nuova          
-          //  echo 'immagine arriva';   
-        //    $productId["xMultimediaId"] . PHP_EOL; 
-                 //se $productId non è null, aggiorno, altrimenti salvo una nuova immagine e salvo il nome nel db 
-                  if ($productId["xMultimediaId"] !== null) {
-                
-                      $multimedia = $this->multimediaService->edit($productId["xMultimediaId"]); 
-           
-                      $parts = explode("_", $multimedia["filename"], 2); 
-                
-                      if ($_FILES["image"]["name"] !== $parts[1] ) {
-                       //   echo 'non sono uguali quindi vanno aggiornati' . PHP_EOL . PHP_EOL. PHP_EOL;
-                          ///salva fisicamente immagine 
-                      
-                          $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
-                          CompressImage::run($filenames['paths'], $_FILES['image']['type']); 
-                          $request->extra['multi_name'] = $filenames["baseName"]; 
-                          //$this->multimediaService->update($productId["xMultimediaId"], $request); // da scommentare se il test va bene
-
-                          /**
-                           * prima dell'update recupero il filename vecchio 
-                           */
-
-                          ///////////////// DA TESTARE
-
-                          $multi = $this->multimediaService->edit($productId["xMultimediaId"]); 
-
-                          if (!empty($multi)) {  
-                         
-                // eliminare anche immagine da disco 
-                //se la cartella esiste 
-                //elimino i file contenenti quel nome 69a0044152595_Tennis-PNG-Image.png 
-                $formats = ['max','medium','min']; 
-
-
-            $date = explode(' ', $multi["created_at"]); 
-            $formattedDate= (new \DateTime($date[0]))->format("d-m-Y");
-
-           $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/"; 
-
-                foreach ($formats as $key => $value) { 
-
-
-                  
-                //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
-                  if (is_dir($dir)) { 
-                    
-                  //  echo 'trovato' . PHP_EOL; 
-                         $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
-
-                    if (file_exists($file)) { 
-                        unlink($file); 
-                       // echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
-                    } 
-
-                 
-
-
-                  } else {
-                    //echo 'non trovato' . PHP_EOL; 
-                  }
-                  
-                }  
-
-                // $this->deleteEmptyDirs($dir); 
-                // $request->extra["xMultimediaId"] = null; 
-             
-                $this->productService->update($id,$request); 
-               // $this->multimediaService->delete($productId["xMultimediaId"]); 
-
-               $this->multimediaService->update($productId["xMultimediaId"], $request);
-             
-              } else {
-               // echo 'il record multimedia è vuoto ' . PHP_EOL; 
-              }
-
-
-                          /////////////////// fine da testare
-
-                        //   $this->multimediaService->update($productId["xMultimediaId"], $request); 
-
-
-                          
-                   
-                          /// salva sulla tabella 
-                      }else {
-                         /// anche se le sono uguali, i record devono comunque essere salvati 
-                        //echo "sono uguali";
-                      }
-                
-                      //quindi aggiorno; 
-                   
-                  } else {
-                       //echo 'è null quindi creo una nuova immagine'; 
-                       $filenames = ResizeImage::store("image",[1920, 800, 400],"products"); 
-                       CompressImage::run($filenames['paths'], $_FILES['image']['type']); 
-                       $request->extra['fileimage'] =  $filenames['baseName'];
-                       $multimediaId = $this->multimediaService->store($request);
-                       $request->extra['xMultimediaId'] = (int)$multimediaId; 
-                    
-                       $this->productService->update($id,$request); 
-           
-                  }
-               
-              //    $productId["xMultimediaId"];   
-             }else { 
-          
-              if ($productId["xMultimediaId"] !== null) {
-                  $multi = $this->multimediaService->edit($productId["xMultimediaId"]);
-              }        
-         
-              if (!empty($multi)) {  
-                // eliminare anche immagine da disco 
-                //se la cartella esiste 
-                //elimino i file contenenti quel nome 69a0044152595_Tennis-PNG-Image.png 
-                $formats = ['max','medium','min']; 
-
-
-            $date = explode(' ', $multi["created_at"]); 
-            $formattedDate= (new \DateTime($date[0]))->format("d-m-Y");
-
-           $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/"; 
-
-                foreach ($formats as $key => $value) { 
-
-
-                  
-                //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
-                  if (is_dir($dir)) { 
-                    
-                    // echo 'trovato' . PHP_EOL; 
-          $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
-
-                    if (file_exists($file)) { 
-                        unlink($file); 
-                      //  echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
-                    } 
-
-                 
-
-
-                  } else {
-                    //echo 'non trovato' . PHP_EOL; 
-                  }
-                  
-                }  
-
-                $this->deleteEmptyDirs($dir); 
-                $request->extra["xMultimediaId"] = null; 
-             
-                $this->productService->update($id,$request); 
-                $this->multimediaService->delete($productId["xMultimediaId"]); 
-             
-              } else {
-               // echo 'immagine non esiste su tabella, impossibile eliminarla ' . PHP_EOL; 
-              }
-             
-             
-               // echo "l'immagine non esiste";
-             } 
-            Transaction::commit();
-            if ($data !== false) {
-               Response::success('record updated with success', $data, 200);
-            }else {
-               Response::error('record not found');
-            } 
-          } catch (\Exception $e) {
-              Response::error($e->getMessage(), null, 400);
-              Transaction::rollBack();
-          }
-      }
-
-    ////////////////////////////////////////// ending update temporary 
+    // public function update(int $id, Request $request)
+    // {  
+    //     $data = $this->productService->update($id,$request); 
+    //     if ($data !== false) {
+    //        Response::success('record updated with success', $data, 200);
+    //     }else {
+    //        Response::error('record not found');
+    //     }
+    // }  
 
     
 
@@ -537,7 +340,7 @@ class ProductController extends Controller
                 //  $dir = $_SERVER['DOCUMENT_ROOT'] . "/uploads/images/products/".$formattedDate."/".strtolower($formats[$key])."/"; 
                   if (is_dir($dir)) { 
                     
-                    echo 'trovato'; 
+                    echo 'trovato' . PHP_EOL; 
                $file = $dir.strtolower($formats[$key])."/".$multi["filename"]; 
            $fileToDelete[] = $file; 
 
@@ -550,7 +353,7 @@ class ProductController extends Controller
 
 
                   } else {
-                    echo 'non trovato'; 
+                    echo 'non trovato' . PHP_EOL; 
                   }
                   
                 }  
@@ -574,11 +377,11 @@ class ProductController extends Controller
                     {  
                         unlink($file); 
                         $this->deleteEmptyDirs($dir);
-                        echo "il file esiste ed è stato eliminato correttamente";
+                        echo "il file esiste ed è stato eliminato correttamente" . PHP_EOL;
                     }
                 } 
 
-                echo $dir;
+                echo $dir . PHP_EOL;
              }
         
 
