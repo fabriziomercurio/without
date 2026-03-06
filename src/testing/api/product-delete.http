@@ -1,0 +1,2 @@
+POST http://localhost:8080/api/products/18
+X-HTTP-Method-Override: DELETE

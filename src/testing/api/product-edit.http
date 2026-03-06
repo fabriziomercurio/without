@@ -1,0 +1,5 @@
+GET http://localhost:8080/api/product/22
+Content-Type: application/json
+
+
+

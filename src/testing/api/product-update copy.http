@@ -1,0 +1,8 @@
+PUT http://localhost:8080/api/product-update/2
+Content-Type: application/json
+
+{ 
+    "name": "product name with image",
+    "descr": "my description custom update xx",
+    "code": "12"
+}
