@@ -6,10 +6,17 @@ namespace App\Core;
 class Request 
 {   
     public array $extra = []; 
+
+    private string $method; 
     
-    private function getMethod() 
+    public function __construct() 
     {
-        return $_SERVER['REQUEST_METHOD']; 
+      $this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'];
+    } 
+
+    public function getMethod() 
+    {
+        return strtoupper($this->method); 
     } 
 
 
@@ -17,20 +24,25 @@ class Request
     Legge il corpo grezzo della richiesta HTTP, 
     php://input è uno stream che ti permette di accedere ai dati inviati nel body, 
     utile quando il Content-Type è application/json. 
-    */
+    */ 
 
-    public function getBody() : array
-    {       
-      if (!empty($_POST)) { 
+    public function getBody(): array
+    {
+        $contentType = $_SERVER['CONTENT_TYPE'] ?? '';
+
+        // 'application/json'
+        if (str_contains($contentType, 'application/json')) {
+            $raw = file_get_contents("php://input");
+            return json_decode($raw, true) ?? [];
+        }
+
+        // multipart/form-data
+        if (str_contains($contentType, 'multipart/form-data')) {         
+            return $_POST;
+        }
+
+        // application/x-www-form-urlencoded
         return $_POST;
-      }
-      
-      if ($this->getMethod() === 'POST' || $this->getMethod() === 'PUT'){  
-              
-        $raw = file_get_contents("php://input");
-        return json_decode($raw, true) ?? [];
-      }
-        return []; 
     }
 } 
 

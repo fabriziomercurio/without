@@ -34,7 +34,7 @@ class ProductController extends Controller
     {   
         $data = $this->productService->edit($productId);
  
-        if ($data["xMultimediaId"] !== NULL) { 
+        if ($data !== false && $data["xMultimediaId"] !== NULL) { 
            $data['multimedia'] = $this->multimediaService->edit($data["xMultimediaId"]); 
            $formats = ['max', 'medium', 'min']; 
            
