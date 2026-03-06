@@ -20,9 +20,9 @@ abstract class Model
         return self::$pdo; 
     } 
 
-    public static function fetchAllData(string $table) : array
-    {
-        $stmt = self::pdo()->prepare("SELECT * FROM ".$table);
+    public static function fetchAllData(string $table, string $orderBy = '') : array
+    { 
+        $stmt = self::pdo()->prepare("SELECT * FROM ".$table." ".$orderBy);
         $stmt->execute(); 
         return $stmt->fetchAll(); 
     }   
@@ -45,9 +45,8 @@ abstract class Model
         return $result;
     }
 
-    public static function updateRecord(int $id, Request $request, string $table) : bool 
-    {   
-        $data = $request->getBody(); 
+    public static function updateRecord(int $id, array $data, string $table) : bool 
+    {  
         $parameters = implode(",", array_map(function($n){ return $n . " = :" . $n; }, array_keys($data)));  
         $sql = "UPDATE " . $table . " SET " . $parameters . " WHERE id = :id"; 
         $sth = self::pdo()->prepare($sql);  
@@ -56,7 +55,7 @@ abstract class Model
     }
 
     public static function deleteRecord(int $id, string $table) : bool
-    {       
+    {    
         $sth = self::pdo()->prepare("DELETE FROM ".$table." WHERE id = :id");
         $sth->execute(array('id' => $id));
         return true;
@@ -70,7 +69,7 @@ abstract class Model
                 if (isset($this->casts[$key])) { 
                   settype($value, $this->casts[$key]); 
                 }
-                $this->{$key} = $value;         
+                $this->{$key} = $value;  
            }
         } 
     } 
@@ -89,6 +88,24 @@ abstract class Model
        } 
        return $data; 
     } 
+
+    /**
+     * it maps attributes making them optionals, 
+     * it must used with update method  
+     */
+    protected function getMapRequestAttributes($input) 
+    {   
+         $array = []; 
+        foreach ($this->fillable() as $field) {
+       $property = $this->alias[$field] ?? $field; 
+       
+           if (array_key_exists($property,$input)) {  
+               $array[$field] = $input[$property]; 
+           }
+        }
+
+        return $array;
+    }
 
     public function findEmail(string $value) 
     {

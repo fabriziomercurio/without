@@ -26,7 +26,7 @@ class CompressImage
 
     private static function checkMime(string $mime) 
     {
-      if ($mime !== 'image/png' && $mime !== 'image/jpeg') throw new Exception("Unsupported MIME type");
+      if ($mime !== 'image/png' && $mime !== 'image/jpeg') throw new \Exception("Unsupported MIME type");
     }
 
     private static function compressPNG($source)

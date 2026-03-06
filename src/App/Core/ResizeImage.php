@@ -25,7 +25,6 @@ class ResizeImage
     */
    public static function store(string $name, array $sizes, string $nameFolder) : array 
    { 
-        
      if (count($sizes) !== 3) throw new \Exception('Image dimensions must be three'); 
 
      if(!preg_match('/^[a-zA-Z0-9_-]+$/', $nameFolder)) throw new \Exception('The folder name must not contain any symbols or numbers');

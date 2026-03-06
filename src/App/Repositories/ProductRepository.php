@@ -28,8 +28,9 @@ class ProductRepository
     } 
 
     public function update(int $id, Request $request) : bool 
-    {
-       return Product::update($id,$request);  
+    {   
+       $data = new Product; 
+       return $data->update($id,$request);  
     }
 
     public function delete(int $id) : bool

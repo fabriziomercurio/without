@@ -4,12 +4,16 @@ declare(strict_types=1);
 use App\Controllers\LoginController;
 use App\Controllers\RegisterController; 
 use App\Controllers\ProductController; 
+use App\Middlewares\XHttpMethodOverride;
+
+XHttpMethodOverride::handle();
 
 $router->post('api/login',[LoginController::class,"doLogin"]); 
 $router->post('api/user-register',[RegisterController::class,"store"]);
 $router->get('api/products',[ProductController::class,"show"]); 
 $router->post('api/product',[ProductController::class,"store"]); 
 $router->put('api/product-update/{id:[0-9]+}', [ProductController::class, 'update']);
+$router->post('api/product-update', [ProductController::class, 'updateTemporary']);
 $router->get('api/product/{productId:[0-9]+}', [ProductController::class, 'edit']);
 $router->delete('api/products/{productId:[0-9]+}',[ProductController::class,"delete"]);
 

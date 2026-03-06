@@ -15,12 +15,15 @@ class Product extends Model
     public ?string $code = null;
     public ?string $image = null; 
     public ?int $xMultimediaId = null;
+    public ?int $id = null;
     public float $price, $weight; 
     public int $available; 
     
     public array $fillable = ['name','description','xMultimediaId']; 
 
     public static string $table = 'products'; 
+    public static string $orderBy = 'ORDER BY ID DESC'; 
+    protected array $casts = ['id'=>'integer'];
 
     protected function getTable(): string 
     {  
@@ -52,7 +55,7 @@ class Product extends Model
     
     public static function fetchAll() : array
     {   
-        return self::fetchAllData(self::$table);      
+        return self::fetchAllData(self::$table,self::$orderBy);      
     } 
 
     public function store() : string|false 
@@ -66,14 +69,16 @@ class Product extends Model
         return self::editRecord($id,self::$table); 
     } 
 
-    public static function update(int $id, Request $request) : bool 
-    {
-        return self::updateRecord($id, $request,self::$table); 
+    public function update(int $id, Request $request) : bool 
+    {   
+        $input = array_merge($request->getBody(),$request->extra); 
+        $data = $this->getMapRequestAttributes($input);
+        return self::updateRecord($id, $data, self::$table); 
     }
 
-    public static function delete(int $id) : bool
-    {
-       return self::deleteRecord($id,$this->table); 
+    public static function delete(int $id) : bool     
+    {  
+       return self::deleteRecord($id,self::$table); 
     }
 }
 
