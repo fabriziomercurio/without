@@ -53,9 +53,9 @@ class Router
      */
     public function run() 
     {   
-        $requestedRoute = trim($_SERVER['REQUEST_URI'], "/"); 
+        $requestedRoute = trim($_SERVER['REQUEST_URI'], "/");      
 
-        $routes = $this->routes[$_SERVER['REQUEST_METHOD']]; 
+        $routes = $this->routes[$this->request->getMethod()]; 
 
         foreach ($routes as $uri => $callback) {            
            
@@ -97,7 +97,6 @@ class Router
     {   
         if(is_callable($callback)) 
         {  
-            echo 'call'; 
             return call_user_func_array($callback,$routeParams); 
         }
 
