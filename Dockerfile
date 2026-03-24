@@ -1,7 +1,26 @@
 FROM php:8.4.12-apache 
 WORKDIR /var/www/html 
 
-COPY ./src/ /var/www/html/
+# Install Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# Install ZIP support for Composer
+RUN apt-get update && apt-get install -y \
+    zip \
+    unzip \
+    libzip-dev \
+    && docker-php-ext-install zip
+
+# Copy composer files FIRST
+COPY composer.json /var/www/html/
+
+# Install dependencies (vendor/)
+RUN composer install 
+
+# Install PHPStan
+RUN composer require --dev phpstan/phpstan 
+
+COPY ./src/ /var/www/html/src/ 
 
 # Mod Rewrite
 RUN a2enmod rewrite 

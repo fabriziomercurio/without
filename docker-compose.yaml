@@ -5,11 +5,12 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./src:/var/www/html
+      - ./src:/var/www/html/src
       - ./uploads:/var/www/html/uploads
+      - /var/www/html/vendor
     command: > 
      sh -c "chmod -R 777 /var/www/html/uploads && 
-            apache2-foreground" 
+            exec apache2-foreground" 
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin:5.2.3
