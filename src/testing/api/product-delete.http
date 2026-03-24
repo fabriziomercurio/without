@@ -1,2 +1,2 @@
-POST http://localhost:8080/api/products/18
+POST http://localhost:8080/api/products/81
 X-HTTP-Method-Override: DELETE
