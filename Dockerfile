@@ -1,6 +1,8 @@
 FROM php:8.4.12-apache 
 WORKDIR /var/www/html 
 
+COPY php.ini /usr/local/etc/php/conf.d/php.ini
+
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -20,7 +22,7 @@ RUN composer install
 # Install PHPStan
 RUN composer require --dev phpstan/phpstan 
 
-COPY ./src/ /var/www/html/src/ 
+COPY ./src/ /var/www/html/
 
 # Mod Rewrite
 RUN a2enmod rewrite 
