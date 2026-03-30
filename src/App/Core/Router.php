@@ -9,6 +9,7 @@ class Router
 {   
     private array $routes = [];
     private Request $request; 
+    private array $routeMiddlewares = [];
 
     public function __construct() 
     {
@@ -17,7 +18,8 @@ class Router
 
     public function get(string $uri, callable|array $callback)  
     {
-        $this->routes['GET'][$uri] = $callback; 
+        $this->routes['GET'][$uri] = $callback;    
+        return $this;
     } 
 
     public function post(string $uri, callable|array $callback)  
@@ -95,6 +97,15 @@ class Router
 
     private function manageTypeCallback(callable|array $callback, array $routeParams) 
     {   
+        $method = $_SERVER['REQUEST_METHOD'];
+        $uri = trim($_SERVER['REQUEST_URI'], "/");
+
+        // If there is a middleware for this route → run it
+        if (isset($this->routeMiddlewares[$method][$uri])) {
+            $middlewareClass = $this->routeMiddlewares[$method][$uri];
+            $middlewareClass::validate();  
+        }
+
         if(is_callable($callback)) 
         {  
             return call_user_func_array($callback,$routeParams); 
@@ -120,6 +131,16 @@ class Router
             return call_user_func_array($callback,[$routeParams['id'],$this->request]); 
         } 
 
+    } 
+
+    public function middleware(string $middleware)
+    {
+    // Takes the last recorded route 
+    $lastMethod = array_key_last($this->routes);
+    $lastUri    = array_key_last($this->routes[$lastMethod]);
+    // save associated middleware on route
+    $this->routeMiddlewares[$lastMethod][$lastUri] = $middleware;
+    return $this;
     }
 
 } //end class 

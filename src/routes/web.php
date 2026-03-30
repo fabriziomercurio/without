@@ -16,7 +16,6 @@ $router->get('register',[RegisterController::class,'show']);
 $router->post('register',[RegisterController::class,'store']);
 
 $router->get('product',[ProductController::class, 'show']);
-//$router->post('product',[ProductController::class, 'store']); 
 
 $router->get('product-detail/{productId:[1-9]+}',[ProductController::class, 'edit']);
 
