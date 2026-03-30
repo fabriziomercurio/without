@@ -6,14 +6,9 @@ use App\Interfaces\Database;
 
 class Connection 
 {   
-    private static ?\PDO $pdo = null;
-
-    public static function connect(Database $conn) : \PDO
+    public static function connect(Database $conn)
     {           
-        if (self::$pdo === null) {
-            self::$pdo = $conn::connect(); 
-        }
-        return self::$pdo;
+        return $conn::connect();
     }
 }
 

@@ -4,12 +4,15 @@ declare(strict_types=1);
 use App\Controllers\LoginController;
 use App\Controllers\RegisterController; 
 use App\Controllers\ProductController; 
-use App\Middlewares\JWTvalidate as jwt; 
+use App\Middlewares\JwtValidate as jwt; 
 
 $router->post('api/login',[LoginController::class,"doLogin"]); 
 
 $router->post('api/user-register',[RegisterController::class,"store"]);
-$router->get('api/products',[ProductController::class,"show"])->middleware(jwt::class); 
+$router->get('api/products',[ProductController::class,"show"])->middleware(jwt::class);  
+
+$router->post('api/logout',[LoginController::class,'doLogout']); 
+
 $router->post('api/product',[ProductController::class,"store"]); 
 $router->put('api/product-update/{id:[0-9]+}', [ProductController::class, 'update']);
 $router->put('api/product-update', [ProductController::class, 'updateTemporary']); // to delete

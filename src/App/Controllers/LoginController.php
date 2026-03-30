@@ -7,6 +7,7 @@ use App\Core\Tokens\GetToken;
 use App\Core\Tokens\Jwt;
 use App\Services\UserService;
 use App\Core\Env; 
+use App\Core\Tokens\BlackList\BlackListTokens as BlackList;  
 use App\Core\Tokens\CsrfGenerate;  
 
 class LoginController 
@@ -31,26 +32,45 @@ class LoginController
             $payload = [
                "user_id" => $user["id"], 
                "user_name" => $user["firstname"], 
-               "exp" => time() + 3600 
+               "exp" => time() + 3600, 
+               "jti" => bin2hex(random_bytes(16)) 
             ]; 
 
             $data = $this->token->create($payload);     
-            
-            if(!$this->token->validate($data,ENV::$config['PUBLIC_KEY']))
-            {
-                throw new \Exception("Token non valido");
-            }
-
-            if (!$this->token->isExpired($payload)) {
-                throw new \Exception("Token scaduto");
-            }
            
-            echo Response::success("ti sei loggato correttamente",['name' =>  $user["firstname"]], 200 , $data, $this->csrf->generate()); 
+            Response::success("logging with success",['name' =>  $user["firstname"]], 200 , $data, $this->csrf->generate()); 
           }else { 
-            echo Response::error("credenziali non valide");
+            Response::error("credentials are not valid");
           }
         } catch (\Throwable $th) {
-           echo Response::error($th->getMessage());
+           Response::error($th->getMessage());
+        }
+    } 
+
+    public function doLogout() 
+    {
+        $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? null; 
+ 
+        if (!$auth || $auth === "Bearer null") {
+            http_response_code(401);
+            echo json_encode(["error" => "Token missed"]);
+            exit;
+        }
+
+        $token = str_replace('Bearer ', '', $auth);
+        $token = trim($token, "\""); 
+
+        try {     
+            $jwt = new Jwt('private.key');
+            $payload = $jwt->decodePayload($token);  
+
+            $blacklist = new BlackList;    
+            $blacklist->add($payload["jti"],$payload["exp"]); 
+   
+            Response::success("logout works!"); 
+
+        } catch (\Throwable $th) {
+            Response::error($th->getMessage());
         }
     }
 } 

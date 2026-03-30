@@ -22,6 +22,9 @@ RUN composer install
 # Install PHPStan
 RUN composer require --dev phpstan/phpstan 
 
+# Install Predis
+RUN composer require predis/predis
+
 COPY ./src/ /var/www/html/
 
 # Mod Rewrite

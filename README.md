@@ -10,6 +10,7 @@ The project born for learn modern architecture, create an environment for reprod
 - MySQL 
 - Docker
 - phpMyAdmin
+- Redis 
 
 -- Starting the project
 

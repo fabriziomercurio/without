@@ -1,4 +1,11 @@
-RewriteEngine On 
+RewriteEngine On
+
+# Passa l'header Authorization a PHP
+RewriteCond %{HTTP:Authorization} ^(.*)
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%1]
+
+# Routing verso index.php 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^.*$ /index.php
+RewriteRule ^.*$ /index.php [L]
+

@@ -70,7 +70,7 @@ class Jwt implements Token
         
         if ($isValid === 1) {
             return true;
-        } elseif ($isValid === 0) {
+        } elseif ($isValid === 0) { 
             throw new \Exception("Firma non valida");
         } else {
             throw new \Exception("Errore nella verifica: " . openssl_error_string());
@@ -83,5 +83,24 @@ class Jwt implements Token
          return false;
        }
        return time() <= $payload['exp'];
-    }
+    } 
+    
+    //Decrypt payload without verifying signature
+    public function decodePayload(string $token) : mixed
+    {
+        $parts = explode('.', $token);
+
+        if (count($parts) !== 3) {
+            throw new \Exception("Token is invalid");
+        }
+
+        $payload = json_decode(base64_decode(strtr($parts[1], '-_', '+/')), true);
+
+        if (!is_array($payload)) {
+            throw new \Exception("Invalid Payload");
+        }
+
+        return $payload;
+    } 
+
 }

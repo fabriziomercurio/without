@@ -7,7 +7,7 @@ use App\Core\Connections\MySQL;
 
 class Transaction
 {
-    private static \PDO $pdo; 
+    private static $pdo; 
 
     public static function init() 
     {
